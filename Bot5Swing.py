@@ -1,6 +1,7 @@
 from BotConfig import *
 from BotUtil import *
 from BotKIKr import BotKIKr
+from dateutil.relativedelta import *
 import pandas as pd
 import datetime
 import threading
@@ -45,7 +46,7 @@ class Bot5Swing():
         self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
 
         self.tot_evl_price = self.get_total_price()
-        self.buy_max_price = self.tot_evl_price / 20
+        self.buy_max_price = self.tot_evl_price / len(self.q_l)
         self.init_marketday = self.bkk.fetch_marketday()
 
         line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
@@ -410,7 +411,10 @@ if __name__ == '__main__':
                     B5.bool_stockorder_timer = False
                     B5.bool_stockorder = False
 
-                if datetime.datetime.weekday() == 6:
+                today = datetime.datetime.today()
+                next_month = datetime.datetime(today.year, today.month, 1) + relativedelta(months=1)
+                month_midl = next_month + relativedelta(seconds=-1)
+                if today.strftime('%Y%m%d') == month_midl.strftime('%Y%m15'):
                     B5.deadline_to_excel()
 
                 B5.bool_marketday = False
