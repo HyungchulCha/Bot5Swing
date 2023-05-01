@@ -410,6 +410,9 @@ if __name__ == '__main__':
                     B5.bool_stockorder_timer = False
                     B5.bool_stockorder = False
 
+                if datetime.datetime.weekday() == 6:
+                    B5.deadline_to_excel()
+
                 B5.bool_marketday = False
                 B5.bool_marketday_end = True
 
