@@ -414,7 +414,7 @@ if __name__ == '__main__':
                 today = datetime.datetime.today()
                 next_month = datetime.datetime(today.year, today.month, 1) + relativedelta(months=1)
                 month_midl = next_month + relativedelta(seconds=-1)
-                if today.strftime('%Y%m%d') == month_midl.strftime('%Y%m15'):
+                if (today.strftime('%Y%m%d') == month_midl.strftime('%Y%m15')) or (today.strftime('%Y%m%d') == month_midl.strftime('%Y%m%d')):
                     B5.deadline_to_excel()
 
                 B5.bool_marketday = False
