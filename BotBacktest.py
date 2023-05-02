@@ -28,8 +28,8 @@ ttl_prft_array = []
 obj = {}
 bal_obj = {}
 
-if os.path.isfile(FILE_URL_BALANCE_LIST_TEST_5M):
-    os.remove(FILE_URL_BALANCE_LIST_TEST_5M)
+if os.path.isfile(FILE_URL_BLNC_TEST_5M):
+    os.remove(FILE_URL_BLNC_TEST_5M)
     print('Delete!!!')
 
 for x in np.nditer(xlsx_list):
@@ -52,12 +52,12 @@ for x in np.nditer(xlsx_list):
     fst_lop = False
     bal_obj[code] = {'p': 0, 'q': 0, 'a': 0, 'max':0, 'pft': 1, 'sel': 1}
 
-    if os.path.isfile(FILE_URL_BALANCE_LIST_TEST_5M):
-        obj = load_file(FILE_URL_BALANCE_LIST_TEST_5M)
+    if os.path.isfile(FILE_URL_BLNC_TEST_5M):
+        obj = load_file(FILE_URL_BLNC_TEST_5M)
         print('Loaded!!!')
     else:
         obj = {}
-        save_file(FILE_URL_BALANCE_LIST_TEST_5M, obj)
+        save_file(FILE_URL_BLNC_TEST_5M, obj)
         print(obj)
         print('Saved!!!')
 
@@ -78,10 +78,9 @@ for x in np.nditer(xlsx_list):
             has_buy = True
             item_buy_c += 1
             print('buy', bal_obj[code]['a'])
-            obj[code] = copy.deepcopy(bal_obj[code])
+            obj[code] = {'max': int(row['close']), 'a': int(row['close']), 'sel': 1}
 
         bal_obj[code]['p'] = int(row['close'])
-        bal_obj[code]['max'] = int(row['close'])
         bal_obj[code]['pft'] = (bal_obj[code]['p'] / bal_obj[code]['a']) if bal_obj[code]['a'] != 0 else 1
         # sell
 
@@ -201,7 +200,7 @@ for x in np.nditer(xlsx_list):
 
     print('종목:{}, 매수: {}회, 매도: {}회, 성공률 : {}%, 실패율 : {}%, 누적수익률 : {}%'.format(code, item_buy_c, item_sel_c, sucs_per, fail_per, prft_per))
 
-    save_file(FILE_URL_BALANCE_LIST_TEST_5M, obj)
+    save_file(FILE_URL_BLNC_TEST_5M, obj)
     
 prft_df = pd.DataFrame({'code': ttl_code_array, 'buy': ttl_buy_array, 'sell': ttl_sel_array, 'success': ttl_sucs_per_array, 'fail': ttl_fail_per_array, 'profit': ttl_prft_array})
 prft_df = prft_df.sort_values('profit', ascending=False)

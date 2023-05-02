@@ -83,13 +83,11 @@ class Bot5Swing():
         bal_lst = self.get_balance_code_list(True)
         sel_lst = []
 
-        if os.path.isfile(FILE_URL_BALANCE_LIST_5M):
-            obj_lst = load_file(FILE_URL_BALANCE_LIST_5M)
-            print('Loaded!!!')
+        if os.path.isfile(FILE_URL_BLNC_5M):
+            obj_lst = load_file(FILE_URL_BLNC_5M)
         else:
             obj_lst = {}
-            save_file(FILE_URL_BALANCE_LIST_5M, obj_lst)
-            print('Saved!!!')
+            save_file(FILE_URL_BLNC_5M, obj_lst)
 
         for code in self.b_l:
 
@@ -154,7 +152,7 @@ class Bot5Swing():
 
                             if (obj_lst[code]['s'] == 1) and (t1 <= los_dif):
 
-                                ord_qty = int(bal_lst[code]['q'] * 0.2) if int(bal_lst[code]['q'] * 0.2) != 0 else 1
+                                ord_qty = int(bal_lst[code]['q']) * 0.2 if int(bal_lst[code]['q']) * 0.2 != 0 else 1
                                 sel_r = self.bkk.create_market_sell_order(code, ord_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty)
                                 _ror = ror(bal_lst[code]['ptp'] * 0.2, bal_lst[code]['ctp'] * 0.2)
 
@@ -170,7 +168,7 @@ class Bot5Swing():
                             
                             elif (obj_lst[code]['s'] == 2) and (t2 <= los_dif):
 
-                                ord_qty = int(bal_lst[code]['q'] * (3/8)) if int(bal_lst[code]['q'] * (3/8)) != 0 else 1
+                                ord_qty = int(bal_lst[code]['q']) * (3/8) if int(bal_lst[code]['q']) * (3/8) != 0 else 1
                                 sel_r = self.bkk.create_market_sell_order(code, ord_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty)
                                 _ror = ror(bal_lst[code]['ptp'] * (3/8), bal_lst[code]['ctp'] * (3/8))
 
@@ -226,7 +224,7 @@ class Bot5Swing():
 
                             obj_lst.pop(code, None)
 
-        save_file(FILE_URL_BALANCE_LIST_5M, obj_lst)
+        save_file(FILE_URL_BLNC_5M, obj_lst)
 
         sel_txt = ''
         for sl in sel_lst:
@@ -328,7 +326,7 @@ class Bot5Swing():
 
     
     def deadline_to_excel(self):
-        save_file(FILE_URL_QUANT_LAST_5M, self.bkk.filter_code_list())
+        save_file(FILE_URL_SMBL_5M, self.bkk.filter_code_list())
         self.market_to_excel(True)
 
     
@@ -362,7 +360,7 @@ class Bot5Swing():
     
     
     def get_guant_code_list(self):
-        _l = load_file(FILE_URL_QUANT_LAST_5M)
+        _l = load_file(FILE_URL_SMBL_5M)
         l = [str(int(i)).zfill(6) for i in _l]
         return l
     
@@ -372,7 +370,17 @@ if __name__ == '__main__':
     B5 = Bot5Swing()
     # 일주일에 한번
     # B5.deadline_to_excel()
-    # B5.market_to_excel(True)
+    # if os.path.isfile(FILE_URL_BLNC_5M):
+    #     os.remove(FILE_URL_BLNC_5M)
+    #     bl = B5.get_balance_code_list(True)
+    #     o = {}
+    #     for i in bl:
+    #         o[i] = {}
+    #         o[i]['x'] = copy.deepcopy(bl[i]['p'])
+    #         o[i]['a'] = copy.deepcopy(bl[i]['a'])
+    #         o[i]['s'] = 1
+    #     save_file(FILE_URL_BLNC_5M, o)
+    # B5.market_to_excel()
 
     while True:
 
