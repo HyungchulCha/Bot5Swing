@@ -122,16 +122,18 @@ class Bot5Swing():
                     (df_t['ma20'].iloc[-1] * 1.05 > df_t['close'].iloc[-1] > df_t['ma20'].iloc[-1]) and \
                     (df_t['close'].iloc[-1] > df_t['ma05'].iloc[-1])\
                     :
-                        ord_q = get_qty(int(chk_cls), self.buy_max_price)
-                        buy_r = self.bkk.create_market_buy_order(code, ord_q) if tn < tn_153000 else self.bkk.create_over_buy_order(code, ord_q)
+                        if int(chk_cls) < int(self.buy_max_price):
 
-                        if buy_r['rt_cd'] == '0':
-                            print(f'매수 - 종목: {code}, 수량: {ord_q}주')
-                            obj_lst[code] = {'a': float(chk_cls), 'x': float(chk_cls), 's': 1}
-                            sel_lst.append({'c': '[B] ' + code, 'r': str(ord_q) + '주'})
-                        else:
-                            msg = buy_r['msg1']
-                            print(f'{msg}')
+                            ord_q = get_qty(int(chk_cls), int(self.buy_max_price))
+                            buy_r = self.bkk.create_market_buy_order(code, ord_q) if tn < tn_153000 else self.bkk.create_over_buy_order(code, ord_q)
+
+                            if buy_r['rt_cd'] == '0':
+                                print(f'매수 - 종목: {code}, 수량: {ord_q}주')
+                                obj_lst[code] = {'a': float(chk_cls), 'x': float(chk_cls), 's': 1}
+                                sel_lst.append({'c': '[B] ' + code, 'r': str(ord_q) + '주'})
+                            else:
+                                msg = buy_r['msg1']
+                                print(f'{msg}')
 
                 obj_ntnul = not (not obj_lst)
 
