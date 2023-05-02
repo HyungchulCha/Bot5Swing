@@ -152,13 +152,15 @@ class Bot5Swing():
 
                             if (obj_lst[code]['s'] == 1) and (t1 <= los_dif):
 
-                                ord_qty = int(bal_lst[code]['q']) * 0.2 if int(bal_lst[code]['q']) * 0.2 != 0 else 1
+                                ord_qty = int(int(bal_lst[code]['q']) * 0.2) if int(int(bal_lst[code]['q']) * 0.2) != 0 else 1
                                 sel_r = self.bkk.create_market_sell_order(code, ord_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty)
                                 _ror = ror(bal_lst[code]['ptp'] * 0.2, bal_lst[code]['ctp'] * 0.2)
 
                                 if sel_r['rt_cd'] == '0':
                                     print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
                                     sel_lst.append({'c': '[S1] ' + code, 'r': round(_ror, 4)})
+                                    if ord_qty == int(bal_lst[code]['q']):
+                                        obj_lst.pop(code, None)
                                 else:
                                     msg = sel_r['msg1']
                                     print(f'{msg}')
@@ -168,13 +170,15 @@ class Bot5Swing():
                             
                             elif (obj_lst[code]['s'] == 2) and (t2 <= los_dif):
 
-                                ord_qty = int(bal_lst[code]['q']) * (3/8) if int(bal_lst[code]['q']) * (3/8) != 0 else 1
+                                ord_qty = int(int(bal_lst[code]['q']) * (3/8)) if int(int(bal_lst[code]['q']) * (3/8)) != 0 else 1
                                 sel_r = self.bkk.create_market_sell_order(code, ord_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty)
                                 _ror = ror(bal_lst[code]['ptp'] * (3/8), bal_lst[code]['ctp'] * (3/8))
 
                                 if sel_r['rt_cd'] == '0':
                                     print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
                                     sel_lst.append({'c': '[S2] ' + code, 'r': round(_ror, 4)})
+                                    if ord_qty == int(bal_lst[code]['q']):
+                                        obj_lst.pop(code, None)
                                 else:
                                     msg = sel_r['msg1']
                                     print(f'{msg}')
