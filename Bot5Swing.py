@@ -105,6 +105,9 @@ class Bot5Swing():
 
                 is_remain = code in self.r_l
                 is_alread = code in bal_lst
+
+                if is_alread and not (code in obj_lst):
+                    obj_lst[code] = {'x': copy.deepcopy(bal_lst[code]['p']), 'a': copy.deepcopy(bal_lst[code]['a']), 's': 1}
                 
                 if (not is_alread) and (not is_remain):
 
@@ -145,51 +148,60 @@ class Bot5Swing():
 
                     if obj_lst[code]['x'] > bal_lst[code]['p']:
 
-                        if 1 < bal_lst[code]['pft'] < hp:
+                        bal_pft = bal_lst[code]['pft']
+                        bal_fst = bal_lst[code]['a']
+                        bal_cur = bal_lst[code]['p']
+                        bal_qty = int(bal_lst[code]['q'])
+                        rto_01 = 0.2
+                        rto_02 = (3/8)
+                        ord_qty_01 = int(bal_qty * rto_01) if int(bal_qty * rto_01) != 0 else 1
+                        ord_qty_02 = int(bal_qty * rto_02) if int(bal_qty * rto_02) != 0 else 1
+                        is_qty_01 = bal_qty == ord_qty_01
+                        is_qty_02 = bal_qty == ord_qty_02
+                        obj_pft = float(obj_lst[code]['x']) / float(obj_lst[code]['a'])
+                        los_dif = obj_pft - bal_pft
+                        sel_cnt = copy.deepcopy(obj_lst[code]['s'])
 
-                            pft_max = float(obj_lst[code]['x']) / float(obj_lst[code]['a'])
-                            los_dif = pft_max - bal_lst[code]['pft']
+                        if 1 < bal_pft < hp:
 
-                            if (obj_lst[code]['s'] == 1) and (t1 <= los_dif):
+                            if (sel_cnt == 1) and (t1 <= los_dif):
 
-                                ord_qty = int(int(bal_lst[code]['q']) * 0.2) if int(int(bal_lst[code]['q']) * 0.2) != 0 else 1
-                                sel_r = self.bkk.create_market_sell_order(code, ord_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty)
-                                _ror = ror(bal_lst[code]['ptp'] * 0.2, bal_lst[code]['ctp'] * 0.2)
+                                sel_r = self.bkk.create_market_sell_order(code, ord_qty_01) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty_01)
+                                _ror = ror(bal_fst * ord_qty_01, bal_cur * ord_qty_01)
 
                                 if sel_r['rt_cd'] == '0':
                                     print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
                                     sel_lst.append({'c': '[S1] ' + code, 'r': round(_ror, 4)})
-                                    if ord_qty == int(bal_lst[code]['q']):
+
+                                    if is_qty_01:
                                         obj_lst.pop(code, None)
                                 else:
                                     msg = sel_r['msg1']
                                     print(f'{msg}')
 
-                                prev_sel = copy.deepcopy(obj_lst[code]['s'])
-                                obj_lst[code]['s'] = prev_sel + 1
+                                obj_lst[code]['s'] = sel_cnt + 1
                             
-                            elif (obj_lst[code]['s'] == 2) and (t2 <= los_dif):
+                            elif (sel_cnt == 2) and (t2 <= los_dif):
 
-                                ord_qty = int(int(bal_lst[code]['q']) * (3/8)) if int(int(bal_lst[code]['q']) * (3/8)) != 0 else 1
-                                sel_r = self.bkk.create_market_sell_order(code, ord_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty)
-                                _ror = ror(bal_lst[code]['ptp'] * (3/8), bal_lst[code]['ctp'] * (3/8))
+                                sel_r = self.bkk.create_market_sell_order(code, ord_qty_02) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty_02)
+                                _ror = ror(bal_fst * ord_qty_02, bal_cur * ord_qty_02)
 
                                 if sel_r['rt_cd'] == '0':
                                     print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
                                     sel_lst.append({'c': '[S2] ' + code, 'r': round(_ror, 4)})
-                                    if ord_qty == int(bal_lst[code]['q']):
+
+                                    if is_qty_02:
                                         obj_lst.pop(code, None)
                                 else:
                                     msg = sel_r['msg1']
                                     print(f'{msg}')
 
-                                prev_sel = copy.deepcopy(obj_lst[code]['s'])
-                                obj_lst[code]['s'] = prev_sel + 1
+                                obj_lst[code]['s'] = sel_cnt + 1
 
-                            elif (obj_lst[code]['s'] == 3) and (t3 <= los_dif):
+                            elif (sel_cnt == 3) and (t3 <= los_dif):
                                     
-                                sel_r = self.bkk.create_market_sell_order(code, bal_lst[code]['q']) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_lst[code]['q'])
-                                _ror = ror(bal_lst[code]['ptp'], bal_lst[code]['ctp'])
+                                sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
+                                _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
 
                                 if sel_r['rt_cd'] == '0':
                                     print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
@@ -200,10 +212,10 @@ class Bot5Swing():
 
                                 obj_lst.pop(code, None)
 
-                        elif hp <= bal_lst[code]['pft']:
+                        elif hp <= bal_pft:
 
-                            sel_r = self.bkk.create_market_sell_order(code, bal_lst[code]['q']) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_lst[code]['q'])
-                            _ror = ror(bal_lst[code]['ptp'], bal_lst[code]['ctp'])
+                            sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
+                            _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
 
                             if sel_r['rt_cd'] == '0':
                                 print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
@@ -214,10 +226,10 @@ class Bot5Swing():
 
                             obj_lst.pop(code, None)
 
-                        elif bal_lst[code]['pft'] <= ct:
+                        elif bal_pft <= ct:
 
-                            sel_r = self.bkk.create_market_sell_order(code, bal_lst[code]['q']) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_lst[code]['q'])
-                            _ror = ror(bal_lst[code]['ptp'], bal_lst[code]['ctp'])
+                            sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
+                            _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
 
                             if sel_r['rt_cd'] == '0':
                                 print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
@@ -374,16 +386,6 @@ if __name__ == '__main__':
     B5 = Bot5Swing()
     # 일주일에 한번
     # B5.deadline_to_excel()
-    # if os.path.isfile(FILE_URL_BLNC_5M):
-    #     os.remove(FILE_URL_BLNC_5M)
-    #     bl = B5.get_balance_code_list(True)
-    #     o = {}
-    #     for i in bl:
-    #         o[i] = {}
-    #         o[i]['x'] = copy.deepcopy(bl[i]['p'])
-    #         o[i]['a'] = copy.deepcopy(bl[i]['a'])
-    #         o[i]['s'] = 1
-    #     save_file(FILE_URL_BLNC_5M, o)
     # B5.market_to_excel()
 
     while True:
@@ -404,7 +406,7 @@ if __name__ == '__main__':
                 B5.bool_marketday = True
                 B5.bool_marketday_end = False
 
-                line_message(f'Stock Start' if B5.init_marketday == 'Y' else 'Holiday Start')
+                line_message(f'Bot5Swing Stock Start' if B5.init_marketday == 'Y' else 'Bot5Swing Holiday Start')
 
             if B5.init_marketday == 'Y':
 
@@ -431,9 +433,9 @@ if __name__ == '__main__':
                 B5.bool_marketday = False
                 B5.bool_marketday_end = True
 
-                line_message(f'Stock End' if B5.init_marketday == 'Y' else 'Holiday End')
+                line_message(f'Bot5Swing Stock End' if B5.init_marketday == 'Y' else 'Bot5Swing Holiday End')
 
         except Exception as e:
 
-            line_message(f"Bot5 Error : {e}")
+            line_message(f"Bot5Swing Error : {e}")
             break
