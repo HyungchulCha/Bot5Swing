@@ -185,19 +185,18 @@ class Bot5Swing():
                                 obj_lst[code]['sel'] = prev_sel + 1
 
                             elif (obj_lst[code]['sel'] == 3) and (t3 <= los_dif):
-                                if t3 <= los_dif:
                                     
-                                    sel_r = self.bkk.create_market_sell_order(code, bal_lst[code]['q']) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_lst[code]['q'])
-                                    _ror = ror(bal_lst[code]['ptp'], bal_lst[code]['ctp'])
+                                sel_r = self.bkk.create_market_sell_order(code, bal_lst[code]['q']) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_lst[code]['q'])
+                                _ror = ror(bal_lst[code]['ptp'], bal_lst[code]['ctp'])
 
-                                    if sel_r['rt_cd'] == '0':
-                                        print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
-                                        sel_lst.append({'c': '[S3] ' + code, 'r': round(_ror, 4)})
-                                    else:
-                                        msg = sel_r['msg1']
-                                        print(f'{msg}')
+                                if sel_r['rt_cd'] == '0':
+                                    print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
+                                    sel_lst.append({'c': '[S3] ' + code, 'r': round(_ror, 4)})
+                                else:
+                                    msg = sel_r['msg1']
+                                    print(f'{msg}')
 
-                                    obj_lst.pop(code, None)
+                                obj_lst.pop(code, None)
 
                         elif hp <= bal_lst[code]['pft']:
 
