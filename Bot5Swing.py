@@ -93,8 +93,8 @@ class Bot5Swing():
         for code in self.b_l:
 
             min_lst = self.bkk.fetch_today_1m_ohlcv(code, tn_df_req, True)['output2'][:5]
-            chk_cls = min_lst[0]['stck_prpr']
-            chk_opn = min_lst[4]['stck_oprc']
+            chk_cls = float(min_lst[0]['stck_prpr'])
+            chk_opn = float(min_lst[4]['stck_oprc'])
             chk_hig = max([float(min_lst[i]['stck_hgpr']) for i in range(5)])
             chk_low = min([float(min_lst[i]['stck_lwpr']) for i in range(5)])
             chk_vol = sum([int(min_lst[i]['cntg_vol']) for i in range(5)])
@@ -122,14 +122,14 @@ class Bot5Swing():
                     (df_t['ma20'].iloc[-1] * 1.05 > df_t['close'].iloc[-1] > df_t['ma20'].iloc[-1]) and \
                     (df_t['close'].iloc[-1] > df_t['ma05'].iloc[-1])\
                     :
-                        if float(chk_cls) < float(self.buy_max_price):
+                        if chk_cls < self.buy_max_price:
 
-                            ord_q = get_qty(float(chk_cls), float(self.buy_max_price))
+                            ord_q = get_qty(chk_cls, self.buy_max_price)
                             buy_r = self.bkk.create_market_buy_order(code, ord_q) if tn < tn_153000 else self.bkk.create_over_buy_order(code, ord_q)
 
                             if buy_r['rt_cd'] == '0':
                                 print(f'매수 - 종목: {code}, 수량: {ord_q}주')
-                                obj_lst[code] = {'a': float(chk_cls), 'x': float(chk_cls), 's': 1}
+                                obj_lst[code] = {'a': chk_cls, 'x': chk_cls, 's': 1}
                                 sel_lst.append({'c': '[B] ' + code, 'r': str(ord_q) + '주'})
                             else:
                                 msg = buy_r['msg1']
@@ -154,14 +154,16 @@ class Bot5Swing():
                         bal_pft = bal_lst[code]['pft']
                         bal_fst = bal_lst[code]['a']
                         bal_cur = bal_lst[code]['p']
-                        bal_qty = int(bal_lst[code]['q'])
+                        bal_qty = bal_lst[code]['q']
                         rto_01 = 0.2
                         rto_02 = (3/8)
                         ord_qty_01 = int(bal_qty * rto_01) if int(bal_qty * rto_01) != 0 else 1
                         ord_qty_02 = int(bal_qty * rto_02) if int(bal_qty * rto_02) != 0 else 1
                         is_qty_01 = bal_qty == ord_qty_01
                         is_qty_02 = bal_qty == ord_qty_02
-                        obj_pft = float(obj_lst[code]['x']) / float(obj_lst[code]['a'])
+                        obj_max = obj_lst[code]['x']
+                        obj_fst = obj_lst[code]['a']
+                        obj_pft = obj_max / obj_fst
                         los_dif = obj_pft - bal_pft
                         sel_cnt = copy.deepcopy(obj_lst[code]['s'])
 
@@ -419,7 +421,7 @@ class Bot5Swing():
                         q = i['ord_psbl_qty']
                         a = i['pchs_avg_pric']
                         o[i['pdno']] = {
-                            'q': q,
+                            'q': int(q),
                             'p': float(p),
                             'a': float(a),
                             'pft': float(p)/float(a),
