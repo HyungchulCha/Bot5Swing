@@ -96,8 +96,8 @@ class Bot5Swing():
             min_lst = self.bkk.fetch_today_1m_ohlcv(code, tn_df_req, True)['output2'][:5]
             chk_cls = min_lst[0]['stck_prpr']
             chk_opn = min_lst[4]['stck_oprc']
-            chk_hig = max([int(min_lst[i]['stck_hgpr']) for i in range(5)])
-            chk_low = min([int(min_lst[i]['stck_lwpr']) for i in range(5)])
+            chk_hig = max([float(min_lst[i]['stck_hgpr']) for i in range(5)])
+            chk_low = min([float(min_lst[i]['stck_lwpr']) for i in range(5)])
             chk_vol = sum([int(min_lst[i]['cntg_vol']) for i in range(5)])
             self.bdf.at[tn_df_idx, code] = str(chk_opn) + '|' + str(chk_hig) + '|' + str(chk_low) + '|' + str(chk_cls) + '|' + str(chk_vol)
 
@@ -114,24 +114,26 @@ class Bot5Swing():
                     df_t = df.tail(1)
 
                     if \
-                    (df_t['close'] < df_t['close_p'] * 1.05) and \
-                    (df_t['height'] > 1.1) and \
-                    (df_t['ma05'] > df_t['ma20'] > df_t['ma60']) and \
-                    (df_t['ma20'] * 1.05 > df_t['close'] > df_t['ma20']) and \
-                    (df_t['close'] > df_t['ma05'])\
+                    (df_t['close'].iloc[-1] < (df_t['close_p'].iloc[-1] * 1.05)) and \
+                    (df_t['height'].iloc[-1] > 1.1) and \
+                    (df_t['ma05'].iloc[-1] > df_t['ma20'].iloc[-1] > df_t['ma60'].iloc[-1]) and \
+                    (df_t['ma20'].iloc[-1] * 1.05 > df_t['close'].iloc[-1] > df_t['ma20'].iloc[-1]) and \
+                    (df_t['close'].iloc[-1] > df_t['ma05'].iloc[-1])\
                     :
                         ord_q = get_qty(int(chk_cls), self.buy_max_price)
                         buy_r = self.bkk.create_market_buy_order(code, ord_q) if tn < tn_153000 else self.bkk.create_over_buy_order(code, ord_q)
 
                         if buy_r['rt_cd'] == '0':
                             print(f'매수 - 종목: {code}, 수량: {ord_q}주')
-                            obj_lst[code] = {'a': int(chk_cls), 'x': int(chk_cls), 's': 1}
+                            obj_lst[code] = {'a': float(chk_cls), 'x': float(chk_cls), 's': 1}
                             sel_lst.append({'c': '[B] ' + code, 'r': str(ord_q) + '주'})
                         else:
                             msg = buy_r['msg1']
                             print(f'{msg}')
 
-                if is_alread:
+                obj_ntnul = not (not obj_lst)
+
+                if is_alread and obj_ntnul:
 
                     t1 = 0.04
                     t2 = 0.05
@@ -349,10 +351,10 @@ class Bot5Swing():
                         a = i['pchs_avg_pric']
                         o[i['pdno']] = {
                             'q': q,
-                            'p': p,
-                            'a': a,
-                            'max': p,
-                            'pft': p/a,
+                            'p': float(p),
+                            'a': float(a),
+                            'max': float(p),
+                            'pft': float(p)/float(a),
                             'sel': 1,
                             'ptp': float(a) * int(q),
                             'ctp': float(p) * int(q)
