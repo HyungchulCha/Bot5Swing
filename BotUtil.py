@@ -50,10 +50,10 @@ def get_qty(crnt_p, max_p):
 
 def get_code_df(_df, code):
     _df_list = _df[code]
-    opn_l = [int(dl.split('|')[0]) for dl in _df_list]
-    hig_l = [int(dl.split('|')[1]) for dl in _df_list]
-    low_l = [int(dl.split('|')[2]) for dl in _df_list]
-    cls_l = [int(dl.split('|')[3]) for dl in _df_list]
+    opn_l = [float(dl.split('|')[0]) for dl in _df_list]
+    hig_l = [float(dl.split('|')[1]) for dl in _df_list]
+    low_l = [float(dl.split('|')[2]) for dl in _df_list]
+    cls_l = [float(dl.split('|')[3]) for dl in _df_list]
     vol_l = [int(dl.split('|')[4]) for dl in _df_list]
     df = pd.DataFrame({'open': opn_l, 'high': hig_l, 'low': low_l, 'close': cls_l, 'vol': vol_l})
     return df
