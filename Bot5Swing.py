@@ -14,7 +14,7 @@ class Bot5Swing():
     
     def __init__(self):
 
-        self.mock = True
+        self.mock = False
         self.key = KI_APPKEY_IMITATION if self.mock else KI_APPKEY_PRACTICE
         self.secret = KI_APPSECRET_IMITATION if self.mock else KI_APPSECRET_PRACTICE
         self.account = KI_ACCOUNT_IMITATION if self.mock else KI_ACCOUNT_PRACTICE
