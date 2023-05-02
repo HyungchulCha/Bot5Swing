@@ -165,10 +165,10 @@ class Bot5Swing():
                                     msg = sel_r['msg1']
                                     print(f'{msg}')
 
-                                prev_sel = copy.deepcopy(obj_lst[code]['sel'])
-                                obj_lst[code]['sel'] = prev_sel + 1
+                                prev_sel = copy.deepcopy(obj_lst[code]['s'])
+                                obj_lst[code]['s'] = prev_sel + 1
                             
-                            elif (obj_lst[code]['sel'] == 2) and (t2 <= los_dif):
+                            elif (obj_lst[code]['s'] == 2) and (t2 <= los_dif):
 
                                 ord_qty = int(bal_lst[code]['q'] * (3/8)) if int(bal_lst[code]['q'] * (3/8)) != 0 else 1
                                 sel_r = self.bkk.create_market_sell_order(code, ord_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty)
@@ -181,10 +181,10 @@ class Bot5Swing():
                                     msg = sel_r['msg1']
                                     print(f'{msg}')
 
-                                prev_sel = copy.deepcopy(obj_lst[code]['sel'])
-                                obj_lst[code]['sel'] = prev_sel + 1
+                                prev_sel = copy.deepcopy(obj_lst[code]['s'])
+                                obj_lst[code]['s'] = prev_sel + 1
 
-                            elif (obj_lst[code]['sel'] == 3) and (t3 <= los_dif):
+                            elif (obj_lst[code]['s'] == 3) and (t3 <= los_dif):
                                     
                                 sel_r = self.bkk.create_market_sell_order(code, bal_lst[code]['q']) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_lst[code]['q'])
                                 _ror = ror(bal_lst[code]['ptp'], bal_lst[code]['ctp'])
