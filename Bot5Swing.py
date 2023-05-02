@@ -122,9 +122,9 @@ class Bot5Swing():
                     (df_t['ma20'].iloc[-1] * 1.05 > df_t['close'].iloc[-1] > df_t['ma20'].iloc[-1]) and \
                     (df_t['close'].iloc[-1] > df_t['ma05'].iloc[-1])\
                     :
-                        if int(chk_cls) < int(self.buy_max_price):
+                        if float(chk_cls) < float(self.buy_max_price):
 
-                            ord_q = get_qty(int(chk_cls), int(self.buy_max_price))
+                            ord_q = get_qty(float(chk_cls), float(self.buy_max_price))
                             buy_r = self.bkk.create_market_buy_order(code, ord_q) if tn < tn_153000 else self.bkk.create_over_buy_order(code, ord_q)
 
                             if buy_r['rt_cd'] == '0':

@@ -44,7 +44,7 @@ def delete_file(url):
 
 
 def get_qty(crnt_p, max_p):
-    q = int(max_p / int(crnt_p))
+    q = int(max_p / crnt_p)
     return 1 if q == 0 else q
 
 
