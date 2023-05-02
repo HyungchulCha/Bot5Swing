@@ -3,6 +3,7 @@ from BotUtil import *
 from BotKIKr import BotKIKr
 from dateutil.relativedelta import *
 import pandas as pd
+import numpy as np
 import datetime
 import threading
 import os
@@ -46,7 +47,7 @@ class Bot5Swing():
         self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
 
         self.tot_evl_price = self.get_total_price()
-        self.buy_max_price = self.tot_evl_price / len(self.q_l)
+        self.buy_max_price = self.tot_evl_price / (len(self.q_l) * 1.5)
         self.init_marketday = self.bkk.fetch_marketday()
 
         line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
@@ -342,13 +343,70 @@ class Bot5Swing():
 
     
     def deadline_to_excel(self):
-        save_file(FILE_URL_SMBL_5M, self.bkk.filter_code_list())
+
+        '''
+        [종목선정]
+        시가총액 300억이상
+        기준가 500이상
+        신고가(종가기준) 오늘종가가 지난 20봉중 신고가
+        거래량 비율 어제부터 10봉전까지 평균보다 250%이상
+        오늘포함 10봉간 최고최저폭 50%이하만
+        '''
+
+        cl = self.bkk.filter_code_list()
+
+        tn = datetime.datetime.today()
+        tn_1 = tn + relativedelta(months=-1)
+
+        sym_lst = []
+
+        for c in cl:
+            
+            d = self.bkk.fetch_ohlcv_domestic(c, 'D', tn_1.strftime('%Y%m%d'), tn.strftime('%Y%m%d'))
+
+            h_l = []
+            l_l = []
+            c_l = []
+            v_l = []
+
+            for i in d['output2']:
+                h_l.append(float(i['stck_hgpr']))
+                l_l.append(float(i['stck_lwpr']))
+                c_l.append(float(i['stck_clpr']))
+                v_l.append(float(i['acml_vol']))
+
+            m_c = float(d['output1']['hts_avls'])
+            c_p = float(d['output1']['stck_prpr'])
+
+            c_l_t = c_l[0]
+            c_l_x = max(c_l[1:])
+
+            v_l_t = v_l[0]
+            v_l_a = np.mean(v_l[1:11])
+
+            h_l_x = max(h_l)
+            l_l_n = min(l_l)
+
+            if\
+            m_c >= 300 and\
+            c_p >= 500 and\
+            c_l_t > c_l_x and\
+            v_l_t >= v_l_a * 3.5 and\
+            l_l_n * 1.5 >= h_l_x\
+            :
+                sym_lst.append(c)
+
+        if len(sym_lst) > 0:
+            print('##################################################')
+            line_message(f'Symbol List: {len(sym_lst)}개, \n{sym_lst} \nFile Download Complete : {FILE_URL_SMBL_5M}')
+            save_file(FILE_URL_SMBL_5M, sym_lst)
+
         self.market_to_excel(True)
 
     
     def get_total_price(self):
         _total_eval_price = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
-        return _total_eval_price if _total_eval_price < 20000000 else 20000000
+        return _total_eval_price if _total_eval_price < 30000000 else 30000000
         
     
     def get_balance_code_list(self, obj=False):
@@ -385,7 +443,7 @@ if __name__ == '__main__':
 
     B5 = Bot5Swing()
     # 일주일에 한번
-    # B5.deadline_to_excel()
+    B5.deadline_to_excel()
     # B5.market_to_excel()
 
     while True:
@@ -397,7 +455,7 @@ if __name__ == '__main__':
             t_090500 = t_n.replace(hour=9, minute=5, second=0)
             t_152500 = t_n.replace(hour=15, minute=25, second=0)
             t_153000 = t_n.replace(hour=15, minute=30, second=0)
-            t_160000 = t_n.replace(hour=16, minute=0, second=0)
+            t_180000 = t_n.replace(hour=18, minute=0, second=0)
 
             if t_n >= t_085000 and t_n <= t_153000 and B5.bool_marketday == False:
                 if os.path.isfile(os.getcwd() + '/token.dat'):
@@ -417,18 +475,12 @@ if __name__ == '__main__':
                     B5.stock_order()
                     B5.bool_stockorder = True
 
-            if t_n == t_160000 and B5.bool_marketday_end == False:
+            if t_n == t_180000 and B5.bool_marketday_end == False:
 
                 if B5.init_marketday == 'Y':
-                    B5.market_to_excel()
+                    B5.deadline_to_excel()
                     B5.bool_stockorder_timer = False
                     B5.bool_stockorder = False
-
-                today = datetime.datetime.today()
-                next_month = datetime.datetime(today.year, today.month, 1) + relativedelta(months=1)
-                month_midl = next_month + relativedelta(seconds=-1)
-                if (today.strftime('%Y%m%d') == month_midl.strftime('%Y%m15')) or (today.strftime('%Y%m%d') == month_midl.strftime('%Y%m%d')):
-                    B5.deadline_to_excel()
 
                 B5.bool_marketday = False
                 B5.bool_marketday_end = True

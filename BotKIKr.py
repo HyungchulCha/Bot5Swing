@@ -322,8 +322,8 @@ class BotKIKr:
         kp = self.fetch_kospi_symbols()
         kd = self.fetch_kosdaq_symbols()
         kp = kp.loc[(kp['그룹코드'] == 'ST') 
-                & (kp['시가총액규모'] != 0) 
-                & (kp['시가총액'] != 0) 
+                # & (kp['시가총액규모'] != 0) 
+                # & (kp['시가총액'] != 0) 
                 & (kp['우선주'] == 0) 
                 & (kp['단기과열'] == 0) 
                 & (kp['락구분'] == 0)
@@ -351,12 +351,12 @@ class BotKIKr:
                 & (kp['대주가능'] != 'Y') 
                 & (kp['신용가능'] == 'Y')
                 & (kp['증거금비율'] != 100)
-                & (kp['기준가'] > 1000) 
-                & (kp['전일거래량'] > 300000) 
+                # & (kp['기준가'] > 1000) 
+                # & (kp['전일거래량'] > 300000) 
                 ]
         kd = kd.loc[(kd['그룹코드'] == 'ST') 
-                & (kd['시가총액규모'] != 0) 
-                & (kd['시가총액'] != 0) 
+                # & (kd['시가총액규모'] != 0) 
+                # & (kd['시가총액'] != 0) 
                 & (kd['우선주'] == 0) 
                 & (kd['단기과열'] == 0) 
                 & (kd['락구분'] == 0)
@@ -382,13 +382,43 @@ class BotKIKr:
                 & (kd['대주가능'] != 'Y') 
                 & (kd['신용가능'] == 'Y')
                 & (kd['증거금비율'] != 100)
-                & (kp['기준가'] > 1000) 
-                & (kp['전일거래량'] > 300000) 
+                # & (kp['기준가'] > 1000) 
+                # & (kp['전일거래량'] > 300000) 
                 ]
         _code_list = kp['단축코드'].to_list() + kd['단축코드'].to_list()
         code_list = self.get_caution_code_list(_code_list, True)
 
         return code_list
+    
+    def fetch_ohlcv_domestic(self, symbol: str, timeframe:str='D', start_day:str="", end_day:str="", adj_price:bool=True):
+        path = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+        url = f"{self.base_url}/{path}"
+
+        headers = {
+           "content-type": "application/json",
+           "authorization": self.access_token,
+           "appKey": self.api_key,
+           "appSecret": self.api_secret,
+           "tr_id": "FHKST03010100"
+        }
+
+        if end_day == "":
+            now = datetime.datetime.now()
+            end_day = now.strftime("%Y%m%d")
+
+        if start_day == "":
+            start_day = "19800104"
+
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": symbol,
+            "FID_INPUT_DATE_1": start_day,
+            "FID_INPUT_DATE_2": end_day,
+            "FID_PERIOD_DIV_CODE": timeframe,
+            "FID_ORG_ADJ_PRC": 0 if adj_price else 1
+        }
+        resp = requests.get(url, headers=headers, params=params)
+        return resp.json()
     
     def df_today_1m_ohlcv(self, code, to, _min):
         df = None
