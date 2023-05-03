@@ -1,4 +1,5 @@
 from BotConfig import *
+from dateutil.relativedelta import *
 import pandas as pd
 import zipfile
 import json
@@ -351,8 +352,8 @@ class BotKIKr:
                 & (kp['대주가능'] != 'Y') 
                 & (kp['신용가능'] == 'Y')
                 & (kp['증거금비율'] != 100)
-                & (kp['기준가'] > 1000) 
-                & (kp['전일거래량'] > 300000) 
+                # & (kp['기준가'] > 1000) 
+                # & (kp['전일거래량'] > 500000) 
                 ]
         kd = kd.loc[(kd['그룹코드'] == 'ST') 
                 & (kd['시가총액규모'] != 0) 
@@ -382,13 +383,32 @@ class BotKIKr:
                 & (kd['대주가능'] != 'Y') 
                 & (kd['신용가능'] == 'Y')
                 & (kd['증거금비율'] != 100)
-                & (kp['기준가'] > 1000) 
-                & (kp['전일거래량'] > 300000) 
+                # & (kp['기준가'] > 1000) 
+                # & (kp['전일거래량'] > 500000) 
                 ]
         _code_list = kp['단축코드'].to_list() + kd['단축코드'].to_list()
         code_list = self.get_caution_code_list(_code_list, True)
 
-        return code_list
+        tn = datetime.datetime.today()
+        tn_1 = tn + relativedelta(days=-1)
+
+        sym_lst = []
+
+        for cl in code_list:
+            
+            d = self.fetch_ohlcv_domestic(cl, 'D', tn_1.strftime('%Y%m%d'), tn.strftime('%Y%m%d'))
+            cur_p = int(d['output1']['stck_prpr'])
+            cur_v = int(d['output1']['acml_vol'])
+            prv_q = int(d['output1']['prdy_vrss_vol'])
+
+            if \
+            cur_p > 1000 and \
+            cur_v > 500000 and \
+            prv_q > 0 \
+            :
+                sym_lst.append(cl)
+
+        return sym_lst
     
     def fetch_ohlcv_domestic(self, symbol: str, timeframe:str='D', start_day:str="", end_day:str="", adj_price:bool=True):
         path = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
