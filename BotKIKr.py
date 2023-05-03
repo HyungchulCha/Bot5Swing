@@ -352,7 +352,7 @@ class BotKIKr:
                 & (kp['신용가능'] == 'Y')
                 & (kp['증거금비율'] != 100)
                 & (kp['기준가'] > 1000) 
-                & (kp['전일거래량'] > 200000) 
+                & (kp['전일거래량'] > 300000) 
                 ]
         kd = kd.loc[(kd['그룹코드'] == 'ST') 
                 & (kd['시가총액규모'] != 0) 
@@ -383,7 +383,7 @@ class BotKIKr:
                 & (kd['신용가능'] == 'Y')
                 & (kd['증거금비율'] != 100)
                 & (kp['기준가'] > 1000) 
-                & (kp['전일거래량'] > 200000) 
+                & (kp['전일거래량'] > 300000) 
                 ]
         _code_list = kp['단축코드'].to_list() + kd['단축코드'].to_list()
         code_list = self.get_caution_code_list(_code_list, True)
