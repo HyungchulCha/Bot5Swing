@@ -110,7 +110,7 @@ class Bot5Swing():
                 is_alread = code in bal_lst
 
                 if is_alread and not (code in obj_lst):
-                    obj_lst[code] = {'x': copy.deepcopy(bal_lst[code]['p']), 'a': copy.deepcopy(bal_lst[code]['a']), 's': 1}
+                    obj_lst[code] = {'x': copy.deepcopy(bal_lst[code]['p']), 'a': copy.deepcopy(bal_lst[code]['a']), 's': 1, 'd': datetime.datetime.now().strftime('%Y%m%d')}
                 
                 if (not is_alread) and (not is_remain):
 
@@ -131,7 +131,7 @@ class Bot5Swing():
 
                             if buy_r['rt_cd'] == '0':
                                 print(f'매수 - 종목: {code}, 수량: {ord_q}주')
-                                obj_lst[code] = {'a': chk_cls, 'x': chk_cls, 's': 1}
+                                obj_lst[code] = {'a': chk_cls, 'x': chk_cls, 's': 1, 'd': datetime.datetime.now().strftime('%Y%m%d')}
                                 sel_lst.append({'c': '[B] ' + code, 'r': str(ord_q) + '주'})
                             else:
                                 msg = buy_r['msg1']
@@ -141,107 +141,130 @@ class Bot5Swing():
 
                 if is_alread and obj_ntnul:
 
-                    t1 = 0.04
-                    t2 = 0.05
-                    t3 = 0.06
-                    ct = 0.8
-                    hp = 100
+                    obj_d = obj_lst[code]['d']
+                    now_d = datetime.now().strftime('%Y%m%d')
+                    dif_d = datetime(int(now_d[:4]), int(now_d[4:6]), int(now_d[6:])) - datetime(int(obj_d[:4]), int(obj_d[4:6]), int(obj_d[6:]))
 
-                    if obj_lst[code]['x'] < bal_lst[code]['p']:
-                        obj_lst[code]['x'] = copy.deepcopy(bal_lst[code]['p'])
-                        obj_lst[code]['a'] = copy.deepcopy(bal_lst[code]['a'])
+                    if (dif_d.days) >= 10:
 
-                    if obj_lst[code]['x'] > bal_lst[code]['p']:
-
-                        bal_pft = bal_lst[code]['pft']
                         bal_fst = bal_lst[code]['a']
                         bal_cur = bal_lst[code]['p']
                         bal_qty = bal_lst[code]['q']
-                        rto_01 = 0.2
-                        rto_02 = (3/8)
-                        ord_qty_01 = int(bal_qty * rto_01) if int(bal_qty * rto_01) != 0 else 1
-                        ord_qty_02 = int(bal_qty * rto_02) if int(bal_qty * rto_02) != 0 else 1
-                        is_qty_01 = bal_qty == ord_qty_01
-                        is_qty_02 = bal_qty == ord_qty_02
-                        obj_max = obj_lst[code]['x']
-                        obj_fst = obj_lst[code]['a']
-                        obj_pft = obj_max / obj_fst
-                        los_dif = obj_pft - bal_pft
-                        sel_cnt = copy.deepcopy(obj_lst[code]['s'])
 
-                        if 1 < bal_pft < hp:
+                        sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
+                        _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
 
-                            if (sel_cnt == 1) and (t1 <= los_dif):
+                        if sel_r['rt_cd'] == '0':
+                            print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
+                            sel_lst.append({'c': '[SL] ' + code, 'r': round(_ror, 4)})
+                            obj_lst.pop(code, None)
+                        else:
+                            msg = sel_r['msg1']
+                            print(f'{msg}')
 
-                                sel_r = self.bkk.create_market_sell_order(code, ord_qty_01) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty_01)
-                                _ror = ror(bal_fst * ord_qty_01, bal_cur * ord_qty_01)
+                    else:
 
-                                if sel_r['rt_cd'] == '0':
-                                    print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
-                                    sel_lst.append({'c': '[S1] ' + code, 'r': round(_ror, 4)})
-                                    obj_lst[code]['s'] = sel_cnt + 1
+                        t1 = 0.04
+                        t2 = 0.05
+                        t3 = 0.06
+                        ct = 0.8
+                        hp = 100
 
-                                    if is_qty_01:
+                        if obj_lst[code]['x'] < bal_lst[code]['p']:
+                            obj_lst[code]['x'] = copy.deepcopy(bal_lst[code]['p'])
+                            obj_lst[code]['a'] = copy.deepcopy(bal_lst[code]['a'])
+
+                        if obj_lst[code]['x'] > bal_lst[code]['p']:
+
+                            bal_pft = bal_lst[code]['pft']
+                            bal_fst = bal_lst[code]['a']
+                            bal_cur = bal_lst[code]['p']
+                            bal_qty = bal_lst[code]['q']
+                            rto_01 = 0.2
+                            rto_02 = (3/8)
+                            ord_qty_01 = int(bal_qty * rto_01) if int(bal_qty * rto_01) != 0 else 1
+                            ord_qty_02 = int(bal_qty * rto_02) if int(bal_qty * rto_02) != 0 else 1
+                            is_qty_01 = bal_qty == ord_qty_01
+                            is_qty_02 = bal_qty == ord_qty_02
+                            obj_max = obj_lst[code]['x']
+                            obj_fst = obj_lst[code]['a']
+                            obj_pft = obj_max / obj_fst
+                            los_dif = obj_pft - bal_pft
+                            sel_cnt = copy.deepcopy(obj_lst[code]['s'])
+
+                            if 1 < bal_pft < hp:
+
+                                if (sel_cnt == 1) and (t1 <= los_dif):
+
+                                    sel_r = self.bkk.create_market_sell_order(code, ord_qty_01) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty_01)
+                                    _ror = ror(bal_fst * ord_qty_01, bal_cur * ord_qty_01)
+
+                                    if sel_r['rt_cd'] == '0':
+                                        print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
+                                        sel_lst.append({'c': '[S1] ' + code, 'r': round(_ror, 4)})
+                                        obj_lst[code]['s'] = sel_cnt + 1
+
+                                        if is_qty_01:
+                                            obj_lst.pop(code, None)
+                                    else:
+                                        msg = sel_r['msg1']
+                                        print(f'{msg}')
+                                
+                                elif (sel_cnt == 2) and (t2 <= los_dif):
+
+                                    sel_r = self.bkk.create_market_sell_order(code, ord_qty_02) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty_02)
+                                    _ror = ror(bal_fst * ord_qty_02, bal_cur * ord_qty_02)
+
+                                    if sel_r['rt_cd'] == '0':
+                                        print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
+                                        sel_lst.append({'c': '[S2] ' + code, 'r': round(_ror, 4)})
+                                        obj_lst[code]['s'] = sel_cnt + 1
+
+                                        if is_qty_02:
+                                            obj_lst.pop(code, None)
+                                    else:
+                                        msg = sel_r['msg1']
+                                        print(f'{msg}')
+
+                                elif (sel_cnt == 3) and (t3 <= los_dif):
+                                        
+                                    sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
+                                    _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
+
+                                    if sel_r['rt_cd'] == '0':
+                                        print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
+                                        sel_lst.append({'c': '[S3] ' + code, 'r': round(_ror, 4)})
+                                        obj_lst[code]['s'] = sel_cnt + 1
                                         obj_lst.pop(code, None)
-                                else:
-                                    msg = sel_r['msg1']
-                                    print(f'{msg}')
-                            
-                            elif (sel_cnt == 2) and (t2 <= los_dif):
+                                    else:
+                                        msg = sel_r['msg1']
+                                        print(f'{msg}')
 
-                                sel_r = self.bkk.create_market_sell_order(code, ord_qty_02) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty_02)
-                                _ror = ror(bal_fst * ord_qty_02, bal_cur * ord_qty_02)
+                            elif hp <= bal_pft:
 
-                                if sel_r['rt_cd'] == '0':
-                                    print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
-                                    sel_lst.append({'c': '[S2] ' + code, 'r': round(_ror, 4)})
-                                    obj_lst[code]['s'] = sel_cnt + 1
-
-                                    if is_qty_02:
-                                        obj_lst.pop(code, None)
-                                else:
-                                    msg = sel_r['msg1']
-                                    print(f'{msg}')
-
-                            elif (sel_cnt == 3) and (t3 <= los_dif):
-                                    
                                 sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
                                 _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
 
                                 if sel_r['rt_cd'] == '0':
                                     print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
-                                    sel_lst.append({'c': '[S3] ' + code, 'r': round(_ror, 4)})
-                                    obj_lst[code]['s'] = sel_cnt + 1
+                                    sel_lst.append({'c': '[S+] ' + code, 'r': round(_ror, 4)})
+                                    obj_lst.pop(code, None)
+                                else:
+                                    msg = sel_r['msg1']
+                                    print(f'{msg}')                            
+
+                            elif bal_pft <= ct:
+
+                                sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
+                                _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
+
+                                if sel_r['rt_cd'] == '0':
+                                    print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
+                                    sel_lst.append({'c': '[S-] ' + code, 'r': round(_ror, 4)})
                                     obj_lst.pop(code, None)
                                 else:
                                     msg = sel_r['msg1']
                                     print(f'{msg}')
-
-                        elif hp <= bal_pft:
-
-                            sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
-                            _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
-
-                            if sel_r['rt_cd'] == '0':
-                                print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
-                                sel_lst.append({'c': '[S+] ' + code, 'r': round(_ror, 4)})
-                                obj_lst.pop(code, None)
-                            else:
-                                msg = sel_r['msg1']
-                                print(f'{msg}')                            
-
-                        elif bal_pft <= ct:
-
-                            sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
-                            _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
-
-                            if sel_r['rt_cd'] == '0':
-                                print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
-                                sel_lst.append({'c': '[S-] ' + code, 'r': round(_ror, 4)})
-                                obj_lst.pop(code, None)
-                            else:
-                                msg = sel_r['msg1']
-                                print(f'{msg}')
 
         save_file(FILE_URL_BLNC_5M, obj_lst)
 
