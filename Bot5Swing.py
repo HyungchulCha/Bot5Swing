@@ -142,10 +142,10 @@ class Bot5Swing():
                 if is_alread and obj_ntnul:
 
                     obj_d = obj_lst[code]['d']
-                    now_d = datetime.now().strftime('%Y%m%d')
-                    dif_d = datetime(int(now_d[:4]), int(now_d[4:6]), int(now_d[6:])) - datetime(int(obj_d[:4]), int(obj_d[4:6]), int(obj_d[6:]))
+                    now_d = datetime.datetime.now().strftime('%Y%m%d')
+                    dif_d = datetime.datetime(int(now_d[:4]), int(now_d[4:6]), int(now_d[6:])) - datetime.datetime(int(obj_d[:4]), int(obj_d[4:6]), int(obj_d[6:]))
 
-                    if (dif_d.days) >= 10:
+                    if (dif_d.days) >= 7:
 
                         bal_fst = bal_lst[code]['a']
                         bal_cur = bal_lst[code]['p']
