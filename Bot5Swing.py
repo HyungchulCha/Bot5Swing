@@ -14,7 +14,7 @@ class Bot5Swing():
     
     def __init__(self):
 
-        self.mock = False
+        self.mock = True
         self.key = KI_APPKEY_IMITATION if self.mock else KI_APPKEY_PRACTICE
         self.secret = KI_APPSECRET_IMITATION if self.mock else KI_APPSECRET_PRACTICE
         self.account = KI_ACCOUNT_IMITATION if self.mock else KI_ACCOUNT_PRACTICE
@@ -375,24 +375,45 @@ class Bot5Swing():
                 c_l.append(float(i['stck_clpr']))
                 v_l.append(float(i['acml_vol']))
 
-            m_c = float(d['output1']['hts_avls'])
-            c_p = float(d['output1']['stck_prpr'])
+            # 1
+            # m_c = float(d['output1']['hts_avls'])
+            # c_p = float(d['output1']['stck_prpr'])
 
-            c_l_t = c_l[0]
-            c_l_x = max(c_l[1:])
+            # c_l_t = c_l[0]
+            # c_l_x = max(c_l[1:])
 
-            v_l_t = v_l[0]
-            v_l_a = np.mean(v_l[1:11])
+            # v_l_t = v_l[0]
+            # v_l_a = np.mean(v_l[1:11])
 
-            h_l_x = max(h_l)
-            l_l_n = min(l_l)
+            # h_l_x = max(h_l)
+            # l_l_n = min(l_l)
 
-            if\
-            m_c >= 300 and\
-            c_p >= 500 and\
-            c_l_t > c_l_x and\
-            v_l_t >= v_l_a * 3.5 and\
-            l_l_n * 1.5 >= h_l_x\
+            # if\
+            # m_c >= 300 and\
+            # c_p >= 500 and\
+            # c_l_t > c_l_x and\
+            # v_l_t >= v_l_a * 3.5 and\
+            # l_l_n * 1.5 >= h_l_x\
+            # :
+            #     sym_lst.append(c)
+
+            # 2
+            c_l_0 = c_l[0]
+            c_l_1 = c_l[1]
+
+            h_l_x = max(h_l[5:20])
+            l_l_n = min(l_l[5:20])
+
+            c_m05 = np.mean(c_l[:5])
+            c_m20 = np.mean(c_l[:20])
+            c_m60 = np.mean(c_l[:60])
+
+            if \
+            c_l_0 < (c_l_1 * 1.05) and \
+            ((h_l_x / l_l_n) - 1) * 100 > 1.1 and \
+            c_m05 > c_m20 > c_m60 and \
+            c_m20 * 1.05 > c_l_0 > c_m20 and \
+            c_l_0 > c_m05\
             :
                 sym_lst.append(c)
 
