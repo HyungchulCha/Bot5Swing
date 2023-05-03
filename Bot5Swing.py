@@ -464,7 +464,6 @@ class Bot5Swing():
 if __name__ == '__main__':
 
     B5 = Bot5Swing()
-    # 일주일에 한번
     # B5.deadline_to_excel()
     # B5.market_to_excel()
 
