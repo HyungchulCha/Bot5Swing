@@ -47,8 +47,7 @@ class Bot5Swing():
         self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
 
         self.tot_evl_price = self.get_total_price()
-        # self.buy_max_price = self.tot_evl_price / len(self.q_l)
-        self.buy_max_price = self.tot_evl_price / 20
+        self.buy_max_price = self.tot_evl_price / len(self.q_l)
         self.init_marketday = self.bkk.fetch_marketday()
 
         line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
