@@ -14,7 +14,7 @@ class Bot5Swing():
     
     def __init__(self):
 
-        self.mock = True
+        self.mock = False
         self.key = KI_APPKEY_IMITATION if self.mock else KI_APPKEY_PRACTICE
         self.secret = KI_APPSECRET_IMITATION if self.mock else KI_APPSECRET_PRACTICE
         self.account = KI_ACCOUNT_IMITATION if self.mock else KI_ACCOUNT_PRACTICE
@@ -331,7 +331,7 @@ class Bot5Swing():
             df = df.loc[~df.index.duplicated(keep='last')]
 
             print('##################################################')
-            line_message(f'File Download Complete : {FILE_URL_DATA_5M}')
+            line_message(f'Bot5Swing Total Symbol Data: {len(_code_list)}개, \n{_code_list} \nFile Download Complete : {FILE_URL_DATA_5M}')
             print(df)
             df.to_excel(FILE_URL_DATA_5M)
 
@@ -355,72 +355,72 @@ class Bot5Swing():
 
         cl = self.bkk.filter_code_list()
 
-        tn = datetime.datetime.today()
-        tn_1 = tn + relativedelta(months=-1)
+        # tn = datetime.datetime.today()
+        # tn_1 = tn + relativedelta(months=-1)
 
-        sym_lst = []
+        # sym_lst = []
 
-        for c in cl:
+        # for c in cl:
             
-            d = self.bkk.fetch_ohlcv_domestic(c, 'D', tn_1.strftime('%Y%m%d'), tn.strftime('%Y%m%d'))
+        #     d = self.bkk.fetch_ohlcv_domestic(c, 'D', tn_1.strftime('%Y%m%d'), tn.strftime('%Y%m%d'))
 
-            h_l = []
-            l_l = []
-            c_l = []
-            v_l = []
+        #     h_l = []
+        #     l_l = []
+        #     c_l = []
+        #     v_l = []
 
-            for i in d['output2']:
-                h_l.append(float(i['stck_hgpr']))
-                l_l.append(float(i['stck_lwpr']))
-                c_l.append(float(i['stck_clpr']))
-                v_l.append(float(i['acml_vol']))
+        #     for i in d['output2']:
+        #         h_l.append(float(i['stck_hgpr']))
+        #         l_l.append(float(i['stck_lwpr']))
+        #         c_l.append(float(i['stck_clpr']))
+        #         v_l.append(float(i['acml_vol']))
 
-            # 1
-            # m_c = float(d['output1']['hts_avls'])
-            # c_p = float(d['output1']['stck_prpr'])
+        #     # 1
+        #     m_c = float(d['output1']['hts_avls'])
+        #     c_p = float(d['output1']['stck_prpr'])
 
-            # c_l_t = c_l[0]
-            # c_l_x = max(c_l[1:])
+        #     c_l_t = c_l[0]
+        #     c_l_x = max(c_l[1:])
 
-            # v_l_t = v_l[0]
-            # v_l_a = np.mean(v_l[1:11])
+        #     v_l_t = v_l[0]
+        #     v_l_a = np.mean(v_l[1:11])
 
-            # h_l_x = max(h_l)
-            # l_l_n = min(l_l)
+        #     h_l_x = max(h_l)
+        #     l_l_n = min(l_l)
 
-            # if\
-            # m_c >= 300 and\
-            # c_p >= 500 and\
-            # c_l_t > c_l_x and\
-            # v_l_t >= v_l_a * 3.5 and\
-            # l_l_n * 1.5 >= h_l_x\
-            # :
-            #     sym_lst.append(c)
+        #     if\
+        #     m_c >= 300 and\
+        #     c_p >= 500 and\
+        #     c_l_t > c_l_x and\
+        #     v_l_t >= v_l_a * 3.5 and\
+        #     l_l_n * 1.5 >= h_l_x\
+        #     :
+        #         sym_lst.append(c)
 
-            # 2
-            c_l_0 = c_l[0]
-            c_l_1 = c_l[1]
+        #     # 2
+        #     c_l_0 = c_l[0]
+        #     c_l_1 = c_l[1]
 
-            h_l_x = max(h_l[5:20])
-            l_l_n = min(l_l[5:20])
+        #     h_l_x = max(h_l[5:20])
+        #     l_l_n = min(l_l[5:20])
 
-            c_m05 = np.mean(c_l[:5])
-            c_m20 = np.mean(c_l[:20])
-            c_m60 = np.mean(c_l[:60])
+        #     c_m05 = np.mean(c_l[:5])
+        #     c_m20 = np.mean(c_l[:20])
+        #     c_m60 = np.mean(c_l[:60])
 
-            if \
-            c_l_0 < (c_l_1 * 1.05) and \
-            ((h_l_x / l_l_n) - 1) * 100 > 1.1 and \
-            c_m05 > c_m20 > c_m60 and \
-            c_m20 * 1.05 > c_l_0 > c_m20 and \
-            c_l_0 > c_m05\
-            :
-                sym_lst.append(c)
+        #     if \
+        #     c_l_0 < (c_l_1 * 1.05) and \
+        #     ((h_l_x / l_l_n) - 1) * 100 > 1.1 and \
+        #     c_m05 > c_m20 > c_m60 and \
+        #     c_m20 * 1.05 > c_l_0 > c_m20 and \
+        #     c_l_0 > c_m05\
+        #     :
+        #         sym_lst.append(c)
 
-        if len(sym_lst) > 0:
+        if len(cl) > 0:
             print('##################################################')
-            line_message(f'Symbol List: {len(sym_lst)}개, \n{sym_lst} \nFile Download Complete : {FILE_URL_SMBL_5M}')
-            save_file(FILE_URL_SMBL_5M, sym_lst)
+            line_message(f'Bot10Swing Symbol List: {len(cl)}개, \n{cl} \nFile Download Complete : {FILE_URL_SMBL_5M}')
+            save_file(FILE_URL_SMBL_5M, cl)
 
         self.market_to_excel(True)
 
