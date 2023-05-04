@@ -46,7 +46,7 @@ class Bot5Swing():
         self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
 
         _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
-        _buy_cnt = len(self.q_l) if len(self.q_l) > 20 else 20
+        _buy_cnt = len(self.q_l) if len(self.q_l) > 30 else 30
         
         self.tot_evl_price = _ttl_prc if _ttl_prc < 30000000 else 30000000
         self.buy_max_price = self.tot_evl_price / (_buy_cnt * 0.75)
@@ -376,14 +376,6 @@ class Bot5Swing():
 
             if tn_pos_c and _tn_div == 4:
                 self.bool_threshold = True
-
-    
-    def deadline_to_excel(self):
-        sym_lst = self.bkk.filter_code_list()
-        if len(sym_lst) > 0:
-            print('##################################################')
-            line_message(f'Bot5Swing Symbol List: {len(sym_lst)}개, \n{sym_lst} \nFile Download Complete : {FILE_URL_SMBL_5M}')
-            save_file(FILE_URL_SMBL_5M, sym_lst)
         
     
     def get_balance_code_list(self, obj=False):
