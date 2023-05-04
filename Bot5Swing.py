@@ -110,7 +110,7 @@ class Bot5Swing():
                 is_alread = code in bal_lst
 
                 if is_alread and not (code in obj_lst):
-                    obj_lst[code] = {'x': copy.deepcopy(bal_lst[code]['p']), 'a': copy.deepcopy(bal_lst[code]['a']), 's': 1, 'd': datetime.datetime.now().strftime('%Y%m%d')}
+                    obj_lst[code] = {'x': copy.deepcopy(bal_lst[code]['a']), 'a': copy.deepcopy(bal_lst[code]['a']), 's': 1, 'd': datetime.datetime.now().strftime('%Y%m%d')}
                 
                 if (not is_alread) and (not is_remain):
 
@@ -416,7 +416,7 @@ class Bot5Swing():
 if __name__ == '__main__':
 
     B5 = Bot5Swing()
-    # B5.market_to_excel(True, True)
+    B5.market_to_excel(True, True)
 
     while True:
 
