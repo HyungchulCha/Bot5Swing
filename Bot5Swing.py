@@ -49,7 +49,7 @@ class Bot5Swing():
         _buy_cnt = len(self.q_l) if len(self.q_l) > 20 else 20
         
         self.tot_evl_price = _ttl_prc if _ttl_prc < 30000000 else 30000000
-        self.buy_max_price = self.tot_evl_price / _buy_cnt
+        self.buy_max_price = self.tot_evl_price / (_buy_cnt * 0.75)
         self.init_marketday = self.bkk.fetch_marketday()
 
         line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
@@ -203,6 +203,7 @@ class Bot5Swing():
                                         print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
                                         sel_lst.append({'c': '[S1] ' + code, 'r': round(_ror, 4)})
                                         obj_lst[code]['s'] = sel_cnt + 1
+                                        obj_lst[code]['d'] = datetime.datetime.now().strftime('%Y%m%d')
 
                                         if is_qty_01:
                                             obj_lst.pop(code, None)
@@ -219,6 +220,7 @@ class Bot5Swing():
                                         print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
                                         sel_lst.append({'c': '[S2] ' + code, 'r': round(_ror, 4)})
                                         obj_lst[code]['s'] = sel_cnt + 1
+                                        obj_lst[code]['d'] = datetime.datetime.now().strftime('%Y%m%d')
 
                                         if is_qty_02:
                                             obj_lst.pop(code, None)
@@ -235,6 +237,7 @@ class Bot5Swing():
                                         print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
                                         sel_lst.append({'c': '[S3] ' + code, 'r': round(_ror, 4)})
                                         obj_lst[code]['s'] = sel_cnt + 1
+                                        obj_lst[code]['d'] = datetime.datetime.now().strftime('%Y%m%d')
                                         obj_lst.pop(code, None)
                                     else:
                                         msg = sel_r['msg1']
