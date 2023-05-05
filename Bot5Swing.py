@@ -111,6 +111,9 @@ class Bot5Swing():
 
                 if is_alread and not (code in obj_lst):
                     obj_lst[code] = {'x': copy.deepcopy(bal_lst[code]['a']), 'a': copy.deepcopy(bal_lst[code]['a']), 's': 1, 'd': datetime.datetime.now().strftime('%Y%m%d')}
+
+                if not is_alread and (code in obj_lst):
+                    obj_lst.pop(code, None)
                 
                 if (not is_alread) and (not is_remain):
 
