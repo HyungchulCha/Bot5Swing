@@ -350,7 +350,7 @@ class Bot5Swing():
                 tn_req = (tn - datetime.timedelta(minutes=tn_del)).strftime('%H%M00')
 
             if filter:
-                fltr_list = self.bkk.filter_code_list()
+                fltr_list = self.bkk.get_condition_code_list()
                 if len(fltr_list) > 0:
                     save_file(FILE_URL_SMBL_5M, fltr_list)
 
