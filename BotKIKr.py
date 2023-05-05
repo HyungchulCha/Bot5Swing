@@ -433,6 +433,7 @@ class BotKIKr:
 
             if \
             (cls_v > 1000) and \
+            (vlm_v > 1500000000) and \
             (cls_v < (cls_p_v * 1.05)) and \
             (hgt_v > 1.1) and \
             (m05_v > m20_v > m60_v) and \
