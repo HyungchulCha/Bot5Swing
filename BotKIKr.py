@@ -399,6 +399,10 @@ class BotKIKr:
         symbol_list = ft_kp + ft_kd
         filter_symbol_list = []
         i = 1
+
+        vol_v_arr = []
+        vlm_v_arr = []
+
         for symbol in symbol_list:
 
             print(f'Items that meet the conditions: {i} / {len(symbol_list)}')
@@ -430,16 +434,19 @@ class BotKIKr:
             m60_v = df['ma60'].iloc[-1]
             vol_v = df['vol'].iloc[-1]
             vlm_v = df['vlm'].iloc[-1]
-
+            
             if \
             (cls_v > 1000) and \
-            (vlm_v > 1250000000) and \
+            (vol_v > 200000) and \
+            (vlm_v > 300000000) and \
             (cls_v < (cls_p_v * 1.05)) and \
-            (hgt_v > 1.1) and \
+            (hgt_v < 20) and \
             (m05_v > m20_v > m60_v) and \
             (m20_v * 1.05 > cls_v > m20_v) and \
             (cls_v > m05_v)\
             :
+                vol_v_arr.append(vol_v)
+                vlm_v_arr.append(vlm_v)
                 filter_symbol_list.append(symbol)
 
             i += 1

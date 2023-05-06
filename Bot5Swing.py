@@ -46,8 +46,7 @@ class Bot5Swing():
         self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
 
         _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
-        _buy_cnt = len(self.q_l) if len(self.q_l) > 30 else 30
-        _buy_cnt = 60
+        _buy_cnt = len(self.q_l) if len(self.q_l) > 45 else 45
         
         self.tot_evl_price = _ttl_prc if _ttl_prc < 45000000 else 45000000
         self.buy_max_price = self.tot_evl_price / _buy_cnt
