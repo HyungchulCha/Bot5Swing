@@ -49,7 +49,7 @@ class Bot5Swing():
         _buy_cnt = len(self.q_l) if len(self.q_l) > 30 else 30
         _buy_cnt = 60
         
-        self.tot_evl_price = _ttl_prc if _ttl_prc < 30000000 else 30000000
+        self.tot_evl_price = _ttl_prc if _ttl_prc < 45000000 else 45000000
         self.buy_max_price = self.tot_evl_price / _buy_cnt
         self.init_marketday = self.bkk.fetch_marketday()
 
