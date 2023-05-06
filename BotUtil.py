@@ -32,11 +32,11 @@ def get_yfinance_df(f_list, time):
     i = 1
     for fsl in ref_arr:
 
+        print(f'yfinance download : {i} / {len(ref_arr)}')
+
         if time == 10:
 
-            print(f'yfinance download : {i} / {len(ref_arr)}')
             df_sub_arr = []
-
             for j in reversed(range(8)):
                 tn_b = tn_d - relativedelta(days=j)
                 tn_a = tn_d - relativedelta(days=j+1)
@@ -70,8 +70,6 @@ def get_yfinance_df(f_list, time):
             df_arr.append(pd.concat(df_sub_arr, axis=0).tail(80).reset_index(level=None, drop=True))
 
         elif time == 15:
-
-            print(f'yfinance download : {i} / {len(ref_arr)}')
             
             yf_df = yf.download(tickers=fsl, start=str_tn_8, end=str_tn_d, interval='15m', prepost=True)
             df_sub_arr = []
