@@ -47,9 +47,10 @@ class Bot5Swing():
 
         _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
         _buy_cnt = len(self.q_l) if len(self.q_l) > 30 else 30
+        _buy_cnt = 60
         
         self.tot_evl_price = _ttl_prc if _ttl_prc < 30000000 else 30000000
-        self.buy_max_price = self.tot_evl_price / (_buy_cnt * 0.75)
+        self.buy_max_price = self.tot_evl_price / _buy_cnt
         self.init_marketday = self.bkk.fetch_marketday()
 
         line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
