@@ -116,6 +116,9 @@ class Bot5Swing():
 
                 if not is_alread and (code in obj_lst):
                     obj_lst.pop(code, None)
+
+                if is_alread and (code in obj_lst) and (not ('d' in obj_lst[code])):
+                    obj_lst[code]['d'] = datetime.datetime.now().strftime('%Y%m%d')
                 
                 if (not is_alread) and (not is_remain):
 
