@@ -153,11 +153,12 @@ class Bot5Swing():
 
                 if is_alread and is_notnul:
 
-                    obj_d = obj_lst[code]['d']
+                    obj_d = copy.deepcopy(obj_lst[code]['d'])
+                    obj_s = copy.deepcopy(obj_lst[code]['s'])
                     now_d = datetime.datetime.now().strftime('%Y%m%d')
                     dif_d = datetime.datetime(int(now_d[:4]), int(now_d[4:6]), int(now_d[6:])) - datetime.datetime(int(obj_d[:4]), int(obj_d[4:6]), int(obj_d[6:]))
 
-                    if (dif_d.days) >= 7:
+                    if (dif_d.days) >= 14 and obj_s == 1:
 
                         bal_fst = bal_lst[code]['a']
                         bal_qty = bal_lst[code]['q']
