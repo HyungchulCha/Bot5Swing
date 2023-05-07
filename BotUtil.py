@@ -132,6 +132,9 @@ def gen_neck_df(df, is_yf=False):
         df['close'] = df['Adj Close']
         df['volume'] = df['Volume']
 
+    if not (df['volume_m'] is None):
+        df['volume_m_mean'] = df['volume_m'].rolling(20).mean()
+
     df['close_prev'] = df['close'].shift()
     df['ma05'] = df['close'].rolling(5).mean()
     df['ma20'] = df['close'].rolling(20).mean()
@@ -142,6 +145,7 @@ def gen_neck_df(df, is_yf=False):
     height_5_20_max = df['high'].rolling(20).max()
     height_5_20_min = df['low'].rolling(20).min()
     df['height_5_20'] = (((height_5_20_max / height_5_20_min) - 1) * 100).shift(5)
+    df['volume_mean'] = df['volume'].rolling(20).mean()
 
     return df
 
