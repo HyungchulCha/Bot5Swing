@@ -610,6 +610,10 @@ class BotKIKr:
         return data
 
     def create_order(self, side: str, symbol: str, price: int, quantity: int, order_type: str) -> dict:
+
+        price = int(price)
+        quantity = int(quantity)
+
         path = "uapi/domestic-stock/v1/trading/order-cash"
         url = f"{self.base_url}/{path}"
 
