@@ -47,8 +47,7 @@ class Bot5Swing():
 
         _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
         _buy_cnt = len(self.q_l) if len(self.q_l) > 45 else 45
-        _ttl_prc = 3000000
-        _buy_cnt = 60
+        _buy_cnt = 120
         
         self.tot_evl_price = _ttl_prc if _ttl_prc < 45000000 else 45000000
         self.buy_max_price = self.tot_evl_price / _buy_cnt
@@ -110,6 +109,7 @@ class Bot5Swing():
 
                 is_remain = code in self.r_l
                 is_alread = code in bal_lst
+                is_notnul = not (not obj_lst)
 
                 if is_alread and not (code in obj_lst):
                     obj_lst[code] = {'x': copy.deepcopy(bal_lst[code]['a']), 'a': copy.deepcopy(bal_lst[code]['a']), 's': 1, 'd': datetime.datetime.now().strftime('%Y%m%d')}
@@ -119,15 +119,20 @@ class Bot5Swing():
                 
                 if (not is_alread) and (not is_remain):
 
-                    df = min_max_height(moving_average(get_code_df(self.bdf, code)))
+                    df = gen_neck_df(gen_code_df(self.bdf, code))
                     df_t = df.tail(1)
 
+                    cls_v = df_t['close'].iloc[-1]
+                    clp_v = df_t['close_prev'].iloc[-1]
+                    m05_v = df_t['ma05'].iloc[-1]
+                    m20_v = df_t['ma20'].iloc[-1]
+                    m60_v = df_t['ma60'].iloc[-1]
+                    hgt_v = df_t['height_5_20'].iloc[-1]
+
                     if \
-                    (df_t['close'].iloc[-1] < (df_t['close_p'].iloc[-1] * 1.05)) and \
-                    (df_t['height'].iloc[-1] > 1.1) and \
-                    (df_t['ma05'].iloc[-1] > df_t['ma20'].iloc[-1] > df_t['ma60'].iloc[-1]) and \
-                    (df_t['ma20'].iloc[-1] * 1.05 > df_t['close'].iloc[-1] > df_t['ma20'].iloc[-1]) and \
-                    (df_t['close'].iloc[-1] > df_t['ma05'].iloc[-1])\
+                    (1.1 < hgt_v < 15) and \
+                    (m60_v < m20_v < m05_v < cls_v < clp_v * 1.05) and \
+                    (m20_v < cls_v < m20_v * 1.05) \
                     :
                         if chk_cls < self.buy_max_price:
 
@@ -142,9 +147,8 @@ class Bot5Swing():
                                 msg = buy_r['msg1']
                                 print(f'{msg}')
 
-                obj_ntnul = not (not obj_lst)
 
-                if is_alread and obj_ntnul:
+                if is_alread and is_notnul:
 
                     obj_d = obj_lst[code]['d']
                     now_d = datetime.datetime.now().strftime('%Y%m%d')
@@ -153,11 +157,10 @@ class Bot5Swing():
                     if (dif_d.days) >= 7:
 
                         bal_fst = bal_lst[code]['a']
-                        bal_cur = bal_lst[code]['p']
                         bal_qty = bal_lst[code]['q']
 
                         sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
-                        _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
+                        _ror = ror(bal_fst * bal_qty, chk_cls * bal_qty)
 
                         if sel_r['rt_cd'] == '0':
                             print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
@@ -175,34 +178,31 @@ class Bot5Swing():
                         ct = 0.8
                         hp = 100
 
-                        if obj_lst[code]['x'] < bal_lst[code]['p']:
-                            obj_lst[code]['x'] = copy.deepcopy(bal_lst[code]['p'])
-                            obj_lst[code]['a'] = copy.deepcopy(bal_lst[code]['a'])
+                        if obj_lst[code]['x'] < chk_cls:
+                            obj_lst[code]['x'] = chk_cls
 
-                        if obj_lst[code]['x'] > bal_lst[code]['p']:
+                        if obj_lst[code]['x'] > chk_cls:
 
-                            bal_pft = bal_lst[code]['pft']
-                            bal_fst = bal_lst[code]['a']
-                            bal_cur = bal_lst[code]['p']
-                            bal_qty = bal_lst[code]['q']
+                            bal_pft = copy.deepcopy(bal_lst[code]['pft'])
+                            bal_fst = copy.deepcopy(bal_lst[code]['a'])
+                            bal_qty = copy.deepcopy(bal_lst[code]['q'])
+                            obj_max = copy.deepcopy(obj_lst[code]['x'])
+                            sel_cnt = copy.deepcopy(obj_lst[code]['s'])
                             rto_01 = 0.2
                             rto_02 = (3/8)
                             ord_qty_01 = int(bal_qty * rto_01) if int(bal_qty * rto_01) != 0 else 1
                             ord_qty_02 = int(bal_qty * rto_02) if int(bal_qty * rto_02) != 0 else 1
                             is_qty_01 = bal_qty == ord_qty_01
                             is_qty_02 = bal_qty == ord_qty_02
-                            obj_max = obj_lst[code]['x']
-                            obj_fst = obj_lst[code]['a']
-                            obj_pft = obj_max / obj_fst
+                            obj_pft = obj_max / bal_fst
                             los_dif = obj_pft - bal_pft
-                            sel_cnt = copy.deepcopy(obj_lst[code]['s'])
 
                             if 1 < bal_pft < hp:
 
                                 if (sel_cnt == 1) and (t1 <= los_dif):
 
                                     sel_r = self.bkk.create_market_sell_order(code, ord_qty_01) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty_01)
-                                    _ror = ror(bal_fst * ord_qty_01, bal_cur * ord_qty_01)
+                                    _ror = ror(bal_fst * ord_qty_01, chk_cls * ord_qty_01)
 
                                     if sel_r['rt_cd'] == '0':
                                         print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
@@ -219,7 +219,7 @@ class Bot5Swing():
                                 elif (sel_cnt == 2) and (t2 <= los_dif):
 
                                     sel_r = self.bkk.create_market_sell_order(code, ord_qty_02) if tn < tn_153000 else self.bkk.create_over_sell_order(code, ord_qty_02)
-                                    _ror = ror(bal_fst * ord_qty_02, bal_cur * ord_qty_02)
+                                    _ror = ror(bal_fst * ord_qty_02, chk_cls * ord_qty_02)
 
                                     if sel_r['rt_cd'] == '0':
                                         print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
@@ -236,7 +236,7 @@ class Bot5Swing():
                                 elif (sel_cnt == 3) and (t3 <= los_dif):
                                         
                                     sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
-                                    _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
+                                    _ror = ror(bal_fst * bal_qty, chk_cls * bal_qty)
 
                                     if sel_r['rt_cd'] == '0':
                                         print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
@@ -251,7 +251,7 @@ class Bot5Swing():
                             elif hp <= bal_pft:
 
                                 sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
-                                _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
+                                _ror = ror(bal_fst * bal_qty, chk_cls * bal_qty)
 
                                 if sel_r['rt_cd'] == '0':
                                     print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
@@ -264,7 +264,7 @@ class Bot5Swing():
                             elif bal_pft <= ct:
 
                                 sel_r = self.bkk.create_market_sell_order(code, bal_qty) if tn < tn_153000 else self.bkk.create_over_sell_order(code, bal_qty)
-                                _ror = ror(bal_fst * bal_qty, bal_cur * bal_qty)
+                                _ror = ror(bal_fst * bal_qty, chk_cls * bal_qty)
 
                                 if sel_r['rt_cd'] == '0':
                                     print(f'매도 - 종목: {code}, 수익: {round(_ror, 4)}')
