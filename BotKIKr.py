@@ -417,8 +417,8 @@ class BotKIKr:
                 hgh_l.append(float(d['stck_hgpr']))
                 low_l.append(float(d['stck_lwpr']))
                 cls_l.append(float(d['stck_clpr']))
-                vol_l.append(int(d['acml_vol']))
-                vlm_l.append(int(d['acml_tr_pbmn']))
+                vol_l.append(float(d['acml_vol']))
+                vlm_l.append(float(d['acml_tr_pbmn']))
 
             _df = pd.DataFrame({'open': opn_l[::-1], 'high': hgh_l[::-1], 'low': low_l[::-1], 'close': cls_l[::-1], 'volume': vol_l[::-1], 'volume_m': vlm_l[::-1]})
             df = gen_neck_df(_df).tail(1)

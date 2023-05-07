@@ -100,7 +100,7 @@ class Bot5Swing():
             chk_opn = float(min_lst[4]['stck_oprc'])
             chk_hig = max([float(min_lst[i]['stck_hgpr']) for i in range(5)])
             chk_low = min([float(min_lst[i]['stck_lwpr']) for i in range(5)])
-            chk_vol = sum([int(min_lst[i]['cntg_vol']) for i in range(5)])
+            chk_vol = sum([float(min_lst[i]['cntg_vol']) for i in range(5)])
             self.bdf.at[tn_df_idx, code] = str(chk_opn) + '|' + str(chk_hig) + '|' + str(chk_low) + '|' + str(chk_cls) + '|' + str(chk_vol)
 
             is_late = tn_div == 2 or tn_div == 3 or tn_div == 4

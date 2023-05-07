@@ -131,8 +131,10 @@ def gen_neck_df(df, is_yf=False):
         df['low'] = df['Low']
         df['close'] = df['Adj Close']
         df['volume'] = df['Volume']
+    
+    df_c = df.columns.to_list()
 
-    if not (df['volume_m'] is None):
+    if 'volume_m' in df_c:
         df['volume_m_mean'] = df['volume_m'].rolling(20).mean()
 
     df['close_prev'] = df['close'].shift()
@@ -156,7 +158,7 @@ def gen_code_df(_df, code):
     hig_l = [float(dl.split('|')[1]) for dl in _df_list]
     low_l = [float(dl.split('|')[2]) for dl in _df_list]
     cls_l = [float(dl.split('|')[3]) for dl in _df_list]
-    vol_l = [int(dl.split('|')[4]) for dl in _df_list]
+    vol_l = [float(dl.split('|')[4]) for dl in _df_list]
     df = pd.DataFrame({'open': opn_l, 'high': hig_l, 'low': low_l, 'close': cls_l, 'volume': vol_l})
     return df
 
