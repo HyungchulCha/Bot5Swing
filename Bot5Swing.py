@@ -34,7 +34,7 @@ class Bot5Swing():
         self.bool_threshold = False
         self.bool_market = False
 
-        self.init_marketday = None
+        self.init_marketday = self.bkk.fetch_marketday()
         self.init_stockorder_timer = None
 
 
@@ -43,7 +43,7 @@ class Bot5Swing():
         self.bkk = BotKIKr(self.key, self.secret, self.account, self.mock)
         self.init_marketday = self.bkk.fetch_marketday()
 
-        if self.bool_market == False:
+        if self.bool_market == False and self.init_marketday == 'Y':
 
             self.init_to_excel()
 
@@ -479,6 +479,7 @@ class Bot5Swing():
 if __name__ == '__main__':
 
     B5 = Bot5Swing()
+    # B5.deadline_symbol_list()
     # B5.market_to_excel()
 
     while True:
@@ -513,10 +514,10 @@ if __name__ == '__main__':
             if t_n == t_180000 and B5.bool_marketday_end == False:
 
                 if B5.init_marketday == 'Y':
+                    B5.deadline_symbol_list()
                     B5.bool_stockorder_timer = False
                     B5.bool_stockorder = False
-
-                B5.deadline_symbol_list()
+                
                 B5.bool_marketday = False
                 B5.bool_marketday_end = True
 
