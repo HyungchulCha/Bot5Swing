@@ -59,7 +59,7 @@ class Bot5Swing():
             self.tot_evl_price = _ttl_prc if _ttl_prc < 60000000 else 60000000
             self.buy_max_price = self.tot_evl_price / _buy_cnt
 
-        line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
+            line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
     
 
     def stock_order(self):
