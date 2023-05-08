@@ -9,82 +9,111 @@ import pickle
 import requests
 import math
 
-def get_yfinance_df(f_list, time):
+def gen_krs_mark(symbols):
 
     krx = fdr.StockListing('KRX')
     ref_arr = []
     i = 1
-    for fl in f_list:
-        print(f'Check Market : {i} / {len(f_list)}')
-        mrk = krx.loc[krx['Code'] == fl]['Market'].iloc[-1]
+
+    for symbol in symbols:
+        print(f'Check Market : {i} / {len(symbols)}')
+        mrk = krx.loc[krx['Code'] == symbol]['Market'].iloc[-1]
         if mrk == 'KOSPI':
-            ref_arr.append(fl+'.KS')
+            ref_arr.append(symbol+'.KS')
         elif mrk == 'KOSDAQ':
-            ref_arr.append(fl+'.KQ')
+            ref_arr.append(symbol+'.KQ')
         i += 1
 
+    return ref_arr
+
+
+def gen_yf_df(symbols, time):
+
+    krs_list = gen_krs_mark(symbols)
     tn_d = datetime.datetime.today()
-    tn_8 = tn_d + relativedelta(days=-8)
-    str_tn_d = tn_d.strftime('%Y-%m-%d')
-    str_tn_8 = tn_8.strftime('%Y-%m-%d')
+    tn_8 = tn_d - relativedelta(days=8)
+
+    if time == 3:
+        str_interval = '1m'
+    elif time == 15:
+        str_interval = '15m'
+    else:
+        str_interval = '5m'
 
     df_arr = []
+
     i = 1
-    for fsl in ref_arr:
+    for krs in krs_list:
 
-        print(f'yfinance download : {i} / {len(ref_arr)}')
+        print(f'yfinance download : {i} / {len(krs_list)}')
 
-        if time == 10:
+        df_sub_arr = []
 
-            df_sub_arr = []
+        if time == 3 or time == 10:
+
             for j in reversed(range(8)):
+
                 tn_b = tn_d - relativedelta(days=j)
                 tn_a = tn_d - relativedelta(days=j+1)
-                yf_df = yf.download(tickers=fsl, start=tn_a.strftime('%Y-%m-%d'), end=tn_b.strftime('%Y-%m-%d'), interval='5m', prepost=True)
 
-                if not (yf_df.empty):
+                df = yf.download(tickers=krs, start=tn_a.strftime('%Y-%m-%d'), end=tn_b.strftime('%Y-%m-%d'), interval=str_interval, prepost=True)
 
-                    yf_df['Open_p'] = yf_df['Open'].shift(-1)
-                    yf_df['High_p'] = yf_df['High'].shift(-1)
-                    yf_df['Low_p'] = yf_df['Low'].shift(-1)
-                    yf_df['Adj Close_p'] = yf_df['Adj Close'].shift(-1)
-                    yf_df['Volume_p'] = yf_df['Volume'].shift(-1)
+                if not (df.empty):
 
+                    if time == 3:
+                        df['open'] = df['Open'].resample(rule='3T').first()
+                        df['high'] = df['High'].resample(rule='3T').max()
+                        df['low'] = df['Low'].resample(rule='3T').min()
+                        df['close'] = df['Adj Close'].resample(rule='3T').last()
+                        df['volume'] = df['Volume'].resample(rule='3T').sum()
+                        df = df.dropna(axis=0)
+                        print(df)
+
+                    elif time == 10:
+                        df['open'] = df['Open'].resample(rule='10T').first()
+                        df['high'] = df['High'].resample(rule='10T').max()
+                        df['low'] = df['Low'].resample(rule='10T').min()
+                        df['close'] = df['Adj Close'].resample(rule='10T').last()
+                        df['volume'] = df['Volume'].resample(rule='10T').sum()
+                        df = df.dropna(axis=0)
+                        print(df)
+                    
                     df_sub_sub_arr = []
-                    h = 0
-                    for x, row in yf_df.iterrows():
-                        if h % 2 == 0:
-                            if not (math.isnan(row['Adj Close_p'])):
-                                str_o = row['Open']
-                                str_h = max(row['High'], row['High_p'])
-                                str_l = min(row['Low'], row['Low_p'])
-                                str_c = row['Adj Close_p']
-                                str_v = sum([row['Volume'], row['Volume_p']])
-                                df_sub_sub_arr.append(str(str_o) + '|' + str(str_h) + '|' + str(str_l) + '|' + str(str_c) + '|' + str(str_v))
-                            else:
-                                df_sub_sub_arr.append(str(row['Open']) + '|' + str(row['High']) + '|' + str(row['Low']) + '|' + str(row['Adj Close_p']) + '|' + str(row['Volume']))
-                        h += 1
+                    for x, row in df.iterrows():
+                        df_sub_sub_arr.append(str(row['open']) + '|' + str(row['high']) + '|' + str(row['low']) + '|' + str(row['close']) + '|' + str(row['volume']))
 
-                    df_sub_arr.append(pd.DataFrame({fsl.split('.')[0]: df_sub_sub_arr}))
+                    df_sub_arr.append(pd.DataFrame({krs.split('.')[0]: df_sub_sub_arr}))
+        
+        elif time == 5 or time == 15:
 
-            df_arr.append(pd.concat(df_sub_arr, axis=0).tail(80).reset_index(level=None, drop=True))
+            df = yf.download(tickers=krs, start=tn_8.strftime('%Y-%m-%d'), end=tn_d.strftime('%Y-%m-%d'), interval=str_interval, prepost=True)
 
-        elif time == 15:
-            
-            yf_df = yf.download(tickers=fsl, start=str_tn_8, end=str_tn_d, interval='15m', prepost=True)
-            df_sub_arr = []
+            if not (df.empty):
+                    
+                df['open'] = df['Open']
+                df['high'] = df['High']
+                df['low'] = df['Low']
+                df['close'] = df['Adj Close']
+                df['volume'] = df['Volume']
+                print(df)
+                
+                df_sub_sub_arr = []
+                for x, row in df.iterrows():
+                    df_sub_sub_arr.append(str(row['open']) + '|' + str(row['high']) + '|' + str(row['low']) + '|' + str(row['close']) + '|' + str(row['volume']))
 
-            for x, row in yf_df.iterrows():
-                df_sub_arr.append(str(row['Open']) + '|' + str(row['High']) + '|' + str(row['Low']) + '|' + str(row['Adj Close']) + '|' + str(row['Volume']))
+                df_sub_arr.append(pd.DataFrame({krs.split('.')[0]: df_sub_sub_arr}))
 
-            df_arr.append(pd.DataFrame({fsl.split('.')[0]: df_sub_arr}).tail(80).reset_index(level=None, drop=True))
+        df_arr.append(pd.concat(df_sub_arr, axis=0).tail(80).reset_index(level=None, drop=True))
 
         i += 1
 
-    df = pd.concat(df_arr, axis=1)
-    df.index.name = 'date'
+    _df = pd.concat(df_arr, axis=1)
+    print(_df)
+    print(_df.columns.to_list())
+    print(_df.index.to_list())
+    _df.index.name = 'date'
 
-    return df
+    return _df
 
 
 def gen_soar_df(df, is_yf=False):
@@ -163,19 +192,6 @@ def gen_code_df(_df, code):
     return df
 
 
-def min_max_height(df):
-    df_len = len(df)
-    ar = [None, None, None, None, None]
-    for i in range(df_len):
-        if i < df_len - 5:
-            hig_v = max(df.iloc[i:i+20]['high'])
-            low_v = min(df.iloc[i:i+20]['low'])
-            hgt_v = ((hig_v / low_v) - 1) * 100
-            ar.append(round(hgt_v, 4))
-    df['height'] = ar
-    return df
-
-
 def save_xlsx(url, df):
     df.to_excel(url)
 
@@ -203,17 +219,6 @@ def delete_file(url):
 def get_qty(crnt_p, max_p):
     q = int(max_p / crnt_p)
     return 1 if q == 0 else q
-
-
-def moving_average(df):
-    df['close_p'] = df['close'].shift()
-    df['ma05'] = df['close'].rolling(5).mean()
-    df['ma20'] = df['close'].rolling(20).mean()
-    df['ma60'] = df['close'].rolling(60).mean()
-    df['ma05_p'] = df['ma05'].shift()
-    df['ma20_p'] = df['ma20'].shift()
-    df['ma60_p'] = df['ma60'].shift()
-    return df
 
 
 def rsi(df, period=14):

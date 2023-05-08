@@ -32,6 +32,7 @@ class Bot5Swing():
         self.bool_stockorder_timer = False
         self.bool_marketday_end = False
         self.bool_threshold = False
+        self.bool_market = False
 
         self.init_marketday = None
         self.init_stockorder_timer = None
@@ -40,18 +41,23 @@ class Bot5Swing():
     def init_per_day(self):
 
         self.bkk = BotKIKr(self.key, self.secret, self.account, self.mock)
-        self.bdf = load_xlsx(FILE_URL_DATA_5M).set_index('date')
-        self.b_l = self.bdf.columns.to_list()
-        self.q_l = self.get_guant_code_list()
-        self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
-
-        _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
-        _buy_cnt = len(self.q_l) if len(self.q_l) > 45 else 45
-        _buy_cnt = 60
-        
-        self.tot_evl_price = _ttl_prc if _ttl_prc < 45000000 else 45000000
-        self.buy_max_price = self.tot_evl_price / _buy_cnt
         self.init_marketday = self.bkk.fetch_marketday()
+
+        if self.init_marketday == 'Y' and self.bool_market == False:
+
+            self.init_to_excel()
+
+            self.bdf = load_xlsx(FILE_URL_DATA_5M).set_index('date')
+            self.b_l = self.bdf.columns.to_list()
+            self.q_l = self.get_guant_code_list()
+            self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
+
+            _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
+            # _buy_cnt = len(self.q_l) if len(self.q_l) > 45 else 45
+            _buy_cnt = 110
+            
+            self.tot_evl_price = _ttl_prc if _ttl_prc < 60000000 else 60000000
+            self.buy_max_price = self.tot_evl_price / _buy_cnt
 
         line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
     
@@ -358,33 +364,86 @@ class Bot5Swing():
             elif tn_pos_c:
                 tn_req = (tn - datetime.timedelta(minutes=tn_del)).strftime('%H%M00')
 
-            if filter:
-                fltr_list = self.bkk.get_condition_code_list()
-                if len(fltr_list) > 0:
-                    save_file(FILE_URL_SMBL_5M, fltr_list)
+            # if filter:
+            #     fltr_list = self.bkk.get_condition_code_list()
+            #     if len(fltr_list) > 0:
+            #         save_file(FILE_URL_SMBL_5M, fltr_list)
 
-            q_list = self.get_guant_code_list()
-            b_list = self.get_balance_code_list()
+            # q_list = self.get_guant_code_list()
+            # b_list = self.get_balance_code_list()
 
-            _code_list = list(set(q_list + b_list))
+            # _code_list = list(set(q_list + b_list))
+            
+            # df_a = []
+            # for c, code in enumerate(_code_list):
+            #     print(f"{c + 1}/{len(_code_list)} {code}")
+            #     df_a.append(self.bkk.df_today_1m_ohlcv(code, tn_req, 5))
+            # df = pd.concat(df_a, axis=1)
+            # df = df.loc[~df.index.duplicated(keep='last')]
+
+            # print('##################################################')
+            # df.to_excel(FILE_URL_DATA_5M)
+            # line_message(f'Bot5Swing \nQuant List: {len(q_list)}종목 \nBalance List: {len(b_list)}종목 \nTotal List: {len(_code_list)}개, \n{_code_list} \nFile Download Complete : {FILE_URL_DATA_5M}')
+            # print(df)
+
+
+            df_befor = load_xlsx(FILE_URL_DATA_5M).sort_index(axis=1)
+            _code_list = df_befor.columns.to_list()[:-1]
             
             df_a = []
             for c, code in enumerate(_code_list):
                 print(f"{c + 1}/{len(_code_list)} {code}")
-                df_a.append(self.bkk.df_today_1m_ohlcv(code, tn_req, 5))
+                df_a.append(self.bkk.df_today_1m_ohlcv(code, tn_req, 3))
             df = pd.concat(df_a, axis=1)
             df = df.loc[~df.index.duplicated(keep='last')]
+            
+            df_after = df.sort_index(axis=1)
+            df_final = pd.concat([df_befor, df_after], axis=0)
+            df_final = df_final.tail(80).reset_index(level=None, drop=True)
+            df_final.drop(['date'], axis=1, inplace=True)
+            df_final.index.name = 'date'
 
-            print('##################################################')
-            df.to_excel(FILE_URL_DATA_5M)
-            line_message(f'Bot5Swing \nQuant List: {len(q_list)}종목 \nBalance List: {len(b_list)}종목 \nTotal List: {len(_code_list)}개, \n{_code_list} \nFile Download Complete : {FILE_URL_DATA_5M}')
-            print(df)
+            self.bdf = df_final
+            self.b_l = self.bdf.columns.to_list()
+            print(self.b_l)
+            self.q_l = self.get_guant_code_list()
+            self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
+
+            _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
+            _buy_cnt = 110
+            
+            self.tot_evl_price = _ttl_prc if _ttl_prc < 45000000 else 45000000
+            self.buy_max_price = self.tot_evl_price / _buy_cnt
+
+            self.bool_market = True
+
 
             _tn = datetime.datetime.now()
             _tn_div = _tn.minute % 5
 
             if tn_pos_c and _tn_div == 4:
                 self.bool_threshold = True
+
+
+    def init_to_excel(self):
+        
+        b_list = self.get_balance_code_list()
+        q_list = self.get_guant_code_list()
+        f_list = list(set(q_list + b_list))
+        f_df = gen_yf_df(f_list, 5)
+        save_xlsx(FILE_URL_DATA_5M, f_df)
+        print('##################################################')
+        line_message(f'Bot5Swing \nSymbol List: {len(q_list)}종목 \nBalance List: {len(b_list)}종목 \nTotal List: {len(f_list)}개, \n{f_list} \nFile Download Complete : {FILE_URL_DATA_5M}')
+        print(f_df)
+        
+
+    def deadline_symbol_list(self):
+
+        q_list = self.bkk.get_condition_code_list()
+        if len(q_list) != 0:
+            save_file(FILE_URL_SMBL_5M, q_list)
+            print('##################################################')
+            line_message(f'Bot5Swing \nSymbol List: {len(q_list)}종목 \n{q_list}')
         
     
     def get_balance_code_list(self, obj=False):
@@ -420,7 +479,7 @@ class Bot5Swing():
 if __name__ == '__main__':
 
     B5 = Bot5Swing()
-    # B5.market_to_excel(True, True)
+    # B5.market_to_excel()
 
     while True:
 
@@ -454,7 +513,7 @@ if __name__ == '__main__':
             if t_n == t_160000 and B5.bool_marketday_end == False:
 
                 if B5.init_marketday == 'Y':
-                    B5.market_to_excel(True, True)
+                    B5.deadline_symbol_list()
                     B5.bool_stockorder_timer = False
                     B5.bool_stockorder = False
 
