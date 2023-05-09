@@ -394,7 +394,7 @@ class BotKIKr:
         ft_kd = self.kosdaq_filter()
 
         tn = datetime.datetime.today()
-        tn_3m = tn - relativedelta(months=3)
+        tn_3m = tn - relativedelta(months=4)
 
         symbol_list = ft_kp + ft_kd
         filter_symbol_list = []
