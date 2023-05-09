@@ -65,6 +65,7 @@ class Bot5Swing():
     def stock_order(self):
 
         tn = datetime.datetime.now()
+        tn_0900 = tn.replace(hour=9, minute=0)
         tn_153000 = tn.replace(hour=15, minute=30, second=0)
         tn_div = tn.minute % 5
         tn_del = None
@@ -101,13 +102,19 @@ class Bot5Swing():
 
         for code in self.b_l:
 
-            min_lst = self.bkk.fetch_today_1m_ohlcv(code, tn_df_req, True)['output2'][:5]
-            chk_cls = float(min_lst[0]['stck_prpr'])
-            chk_opn = float(min_lst[4]['stck_oprc'])
-            chk_hig = max([float(min_lst[i]['stck_hgpr']) for i in range(5)])
-            chk_low = min([float(min_lst[i]['stck_lwpr']) for i in range(5)])
-            chk_vol = sum([float(min_lst[i]['cntg_vol']) for i in range(5)])
-            self.bdf.at[tn_df_idx, code] = str(chk_opn) + '|' + str(chk_hig) + '|' + str(chk_low) + '|' + str(chk_cls) + '|' + str(chk_vol)
+            if tn != tn_0900:
+
+                min_lst = self.bkk.fetch_today_1m_ohlcv(code, tn_df_req, True)['output2'][:5]
+                chk_cls = float(min_lst[0]['stck_prpr'])
+                chk_opn = float(min_lst[4]['stck_oprc'])
+                chk_hig = max([float(min_lst[i]['stck_hgpr']) for i in range(5)])
+                chk_low = min([float(min_lst[i]['stck_lwpr']) for i in range(5)])
+                chk_vol = sum([float(min_lst[i]['cntg_vol']) for i in range(5)])
+                self.bdf.at[tn_df_idx, code] = str(chk_opn) + '|' + str(chk_hig) + '|' + str(chk_low) + '|' + str(chk_cls) + '|' + str(chk_vol)
+
+            else:
+
+                chk_cls = float(self.bdf[code].iloc[-1].split('|')[3])
 
             is_late = tn_div == 2 or tn_div == 3 or tn_div == 4
 
@@ -488,7 +495,7 @@ if __name__ == '__main__':
 
             t_n = datetime.datetime.now()
             t_083000 = t_n.replace(hour=8, minute=30, second=0)
-            t_090500 = t_n.replace(hour=9, minute=5, second=0)
+            t_090000 = t_n.replace(hour=9, minute=0, second=0)
             t_152500 = t_n.replace(hour=15, minute=25, second=0)
             t_153000 = t_n.replace(hour=15, minute=30, second=0)
             t_180000 = t_n.replace(hour=18, minute=0, second=0)
@@ -507,7 +514,7 @@ if __name__ == '__main__':
                 if t_n > t_152500 and t_n < t_153000 and B5.bool_stockorder_timer == False:
                     B5.bool_stockorder_timer = True
 
-                if t_n >= t_090500 and t_n <= t_153000 and B5.bool_stockorder == False:
+                if t_n >= t_090000 and t_n <= t_153000 and B5.bool_stockorder == False:
                     B5.stock_order()
                     B5.bool_stockorder = True
 
