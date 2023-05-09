@@ -143,18 +143,18 @@ class Bot5Swing():
                     (m60_v < m20_v < m05_v < cls_v < clp_v * 1.05) and \
                     (m20_v < cls_v < m20_v * 1.05) \
                     :
-                        if chk_cls < self.buy_max_price:
+                        # if chk_cls < self.buy_max_price:
 
-                            ord_q = get_qty(chk_cls, self.buy_max_price)
-                            buy_r = self.bkk.create_market_buy_order(code, ord_q) if tn < tn_153000 else self.bkk.create_over_buy_order(code, ord_q)
+                        ord_q = get_qty(chk_cls, self.buy_max_price)
+                        buy_r = self.bkk.create_market_buy_order(code, ord_q) if tn < tn_153000 else self.bkk.create_over_buy_order(code, ord_q)
 
-                            if buy_r['rt_cd'] == '0':
-                                print(f'매수 - 종목: {code}, 수량: {ord_q}주')
-                                obj_lst[code] = {'a': chk_cls, 'x': chk_cls, 's': 1, 'd': datetime.datetime.now().strftime('%Y%m%d')}
-                                sel_lst.append({'c': '[B] ' + code, 'r': str(ord_q) + '주'})
-                            else:
-                                msg = buy_r['msg1']
-                                print(f'{msg}')
+                        if buy_r['rt_cd'] == '0':
+                            print(f'매수 - 종목: {code}, 수량: {ord_q}주')
+                            obj_lst[code] = {'a': chk_cls, 'x': chk_cls, 's': 1, 'd': datetime.datetime.now().strftime('%Y%m%d')}
+                            sel_lst.append({'c': '[B] ' + code, 'r': str(ord_q) + '주'})
+                        else:
+                            msg = buy_r['msg1']
+                            print(f'{msg}')
 
 
                 if is_alread and is_notnul:
