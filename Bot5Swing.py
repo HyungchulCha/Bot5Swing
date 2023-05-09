@@ -203,8 +203,8 @@ class Bot5Swing():
                             ord_qty_02 = int(bal_qty * rto_02) if int(bal_qty * rto_02) != 0 else 1
                             is_qty_01 = bal_qty == ord_qty_01
                             is_qty_02 = bal_qty == ord_qty_02
-                            obj_pft = obj_max / bal_fst
-                            bal_pft = chk_cls / bal_fst
+                            obj_pft = ror(bal_fst, obj_max)
+                            bal_pft = ror(bal_fst, chk_cls)
                             los_dif = obj_pft - bal_pft
 
                             if 1 < bal_pft < hp:
