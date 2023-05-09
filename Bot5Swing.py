@@ -54,9 +54,9 @@ class Bot5Swing():
 
             _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
             # _buy_cnt = len(self.q_l) if len(self.q_l) > 45 else 45
-            _buy_cnt = 110
+            _buy_cnt = 80
             
-            self.tot_evl_price = _ttl_prc if _ttl_prc < 60000000 else 60000000
+            self.tot_evl_price = _ttl_prc if _ttl_prc < 40000000 else 40000000
             self.buy_max_price = self.tot_evl_price / _buy_cnt
 
             line_message(f'Bot5Swing \n평가금액 : {self.tot_evl_price}원, 다른종목: {len(self.r_l)}개')
@@ -193,7 +193,6 @@ class Bot5Swing():
 
                         if obj_lst[code]['x'] > chk_cls:
 
-                            bal_pft = copy.deepcopy(bal_lst[code]['pft'])
                             bal_fst = copy.deepcopy(bal_lst[code]['a'])
                             bal_qty = copy.deepcopy(bal_lst[code]['q'])
                             obj_max = copy.deepcopy(obj_lst[code]['x'])
@@ -205,6 +204,7 @@ class Bot5Swing():
                             is_qty_01 = bal_qty == ord_qty_01
                             is_qty_02 = bal_qty == ord_qty_02
                             obj_pft = obj_max / bal_fst
+                            bal_pft = chk_cls / bal_fst
                             los_dif = obj_pft - bal_pft
 
                             if 1 < bal_pft < hp:
@@ -410,9 +410,9 @@ class Bot5Swing():
             self.r_l = list(set(self.get_balance_code_list()).difference(self.q_l))
 
             _ttl_prc = int(self.bkk.fetch_balance()['output2'][0]['tot_evlu_amt'])
-            _buy_cnt = 110
+            _buy_cnt = 80
             
-            self.tot_evl_price = _ttl_prc if _ttl_prc < 60000000 else 60000000
+            self.tot_evl_price = _ttl_prc if _ttl_prc < 40000000 else 40000000
             self.buy_max_price = self.tot_evl_price / _buy_cnt
 
             self.bool_market = True
