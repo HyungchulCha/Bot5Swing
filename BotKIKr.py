@@ -421,24 +421,38 @@ class BotKIKr:
                 vlm_l.append(float(d['acml_tr_pbmn']))
 
             _df = pd.DataFrame({'open': opn_l[::-1], 'high': hgh_l[::-1], 'low': low_l[::-1], 'close': cls_l[::-1], 'volume': vol_l[::-1], 'volume_m': vlm_l[::-1]})
-            df = gen_neck_df(_df).tail(1)
+            # df = gen_neck_df(_df).tail(1)
 
+            # cls_v = df['close'].iloc[-1]
+            # clp_v = df['close_prev'].iloc[-1]
+            # hgt_v = df['height_5_20'].iloc[-1]
+            # m05_v = df['ma05'].iloc[-1]
+            # m20_v = df['ma20'].iloc[-1]
+            # m60_v = df['ma60'].iloc[-1]
+            # vol_m_v = df['volume_mean'].iloc[-1]
+            # vlm_m_v = df['volume_m_mean'].iloc[-1]
+            
+            # if \
+            # (1000 < cls_v) and \
+            # (100000 < vol_m_v) and \
+            # (1000000000 < vlm_m_v) and \
+            # (1 < hgt_v < 30) and \
+            # (m60_v < m20_v < m05_v < cls_v < clp_v * 1.05) and \
+            # (m20_v < cls_v < m20_v * 1.05) \
+            # :
+
+            df = gen_soar_df(_df).tail(1)
             cls_v = df['close'].iloc[-1]
-            clp_v = df['close_prev'].iloc[-1]
-            hgt_v = df['height_5_20'].iloc[-1]
-            m05_v = df['ma05'].iloc[-1]
-            m20_v = df['ma20'].iloc[-1]
-            m60_v = df['ma60'].iloc[-1]
-            vol_m_v = df['volume_mean'].iloc[-1]
-            vlm_m_v = df['volume_m_mean'].iloc[-1]
+            cls_40_x_v = df['close_40_max'].iloc[-1]
+            vol_10_m_v = df['volume_10_mean'].iloc[-1]
+            vol_v = df['volume'].iloc[-1]
+            cls_10_h_v = df['close_10_hgt'].iloc[-1]
             
             if \
             (1000 < cls_v) and \
-            (100000 < vol_m_v) and \
-            (1000000000 < vlm_m_v) and \
-            (1 < hgt_v < 30) and \
-            (m60_v < m20_v < m05_v < cls_v < clp_v * 1.05) and \
-            (m20_v < cls_v < m20_v * 1.05) \
+            (cls_40_x_v < cls_v) and \
+            (vol_10_m_v * 2.5 < vol_v) and \
+            (cls_10_h_v < 150) \
             :
                 
                 filter_symbol_list.append(symbol)
