@@ -171,7 +171,7 @@ class Bot5Swing():
                     now_d = datetime.datetime.now().strftime('%Y%m%d')
                     dif_d = datetime.datetime(int(now_d[:4]), int(now_d[4:6]), int(now_d[6:])) - datetime.datetime(int(obj_d[:4]), int(obj_d[4:6]), int(obj_d[6:]))
 
-                    if (dif_d.days) >= 14 and obj_s == 1:
+                    if (dif_d.days) >= 16 and obj_s == 1:
 
                         bal_fst = bal_lst[code]['a']
                         bal_qty = bal_lst[code]['q']
